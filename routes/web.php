@@ -15,3 +15,12 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 });
+
+
+use App\Http\Controllers\TermsController;
+
+Route::get('/terms', [TermsController::class, 'show'])->name('terms');
+
+use App\Http\Controllers\PrivacyPolicyController;
+
+Route::get('/policy', [PrivacyPolicyController::class, 'show'])->name('policy');

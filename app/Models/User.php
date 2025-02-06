@@ -29,6 +29,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'tid',  // Added Terms & Condition ID
+        'pid',  // Added Privacy Poliy ID
     ];
 
     /**
