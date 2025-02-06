@@ -1,22 +1,59 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-100 pt-2">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
                 <a href="{{ route('dashboard') }}">
-                    <div class="shrink-0 flex items-center">
+                    <div class="shrink-0 space-x-2 flex items-center">
                         <x-application-logo class="block h-[50px] w-auto" />
                         <span class="mt-4 text-xl"><span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">Trading</span> BOT</span>
                     </div>
                 </a>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
+                <nav class="hidden mx-4 p-5 sm:flex">
+                    <ul class="flex space-x-8">
+                        <li>
+                            <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
+                                {{ __('Dashboard') }}
+                            </x-nav-link>
+                        </li>
+                        <li>
+                            <x-nav-link href="" :active="request()->routeIs('strategies')">
+                                {{ __('Strategies') }}
+                            </x-nav-link>
+                        </li>
+                        <li>
+                            <x-nav-link href="" :active="request()->routeIs('webhooks')">
+                                {{ __('Webhooks') }}
+                            </x-nav-link>
+                        </li>
+                        <li class="relative group">
+                            <x-nav-link href="" :active="in_array(Route::currentRouteName(), ['currency', 'exchange'])">
+                                {{ __('Markets & Assets') }}
+                            </x-nav-link>
+                            <ul class="absolute left-0 hidden bg-white text-black shadow-lg group-hover:block w-40">
+                                <li>
+                                    <x-nav-dropdown-link href="" :active="request()->routeIs('currency')">
+                                        {{ __('Curency') }}
+                                    </x-nav-link>
+                                </li>
+                                <li>
+                                    <x-nav-dropdown-link href="" :active="request()->routeIs('exchange')">
+                                        {{ __('Exchange') }}
+                                    </x-nav-link>
+                                </li>
+                                <li>
+                                    <x-nav-dropdown-link href="" :active="request()->routeIs('currencypair')">
+                                        {{ __('Currency Pair') }}
+                                    </x-nav-link>
+                                </li>
+                            </ul>
+                        </li>
+                        <li><a href="#" class="text-white hover:text-gray-300">Contact</a></li>
+                    </ul>
+                </nav>
+
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
