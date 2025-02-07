@@ -52,11 +52,13 @@
                                 </li>
                             </ul>
                         </li>
+                        @if (session('is_admin'))
                         <li>
                             <x-nav-link href="" :active="request()->routeIs('users')">
                                 {{ __('Users') }}
                             </x-nav-link>
                         </li>
+                        @endif
                     </ul>
                 </nav>
             </div>
@@ -221,9 +223,11 @@
                     </x-nav-link>
                 </div>
             </x-responsive-sub-menu-nav-link>
-            <x-responsive-nav-link href="/" :active="request()->routeIs('users')">
-                {{ __('Users') }}
-            </x-nav-link>
+            @if (session('is_admin'))
+                <x-responsive-nav-link href="/" :active="request()->routeIs('users')">
+                    {{ __('Users') }}
+                </x-nav-link>
+            @endif
         </div>
         <hr/>
         <div class="mt-2 space-y-1">

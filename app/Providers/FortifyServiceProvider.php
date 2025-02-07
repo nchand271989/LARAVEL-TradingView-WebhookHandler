@@ -13,6 +13,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
 
+use Illuminate\Support\Facades\Auth;
+
 class FortifyServiceProvider extends ServiceProvider
 {
     /**
@@ -41,6 +43,17 @@ class FortifyServiceProvider extends ServiceProvider
 
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
+        });
+
+        // Store is_admin in session after login
+        Fortify::authenticateUsing(function (Request $request) {
+            $credentials = $request->only(Fortify::username(), 'password');
+            if (Auth::attempt($credentials)) {
+                $user = Auth::user();
+                session(['is_admin' => $user->is_admin]); // Store is_admin in session
+                return $user;
+            }
+            return null;
         });
     }
 }

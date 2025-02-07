@@ -64,6 +64,19 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean', // Ensure is_admin is treated as a boolean
         ];
+    }
+
+     /**
+     * Boot method to set default values when creating a new user.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            $user->is_admin = false; // Ensure new users are always non-admin
+        });
     }
 }
