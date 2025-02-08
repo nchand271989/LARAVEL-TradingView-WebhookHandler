@@ -17,6 +17,16 @@ Route::middleware([
 });
 
 
+use App\Http\Controllers\CurrencyController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('/markets-assets/currencies', CurrencyController::class);
+    Route::patch('/markets-assets/currencies/{curid}/toggle-status', [CurrencyController::class, 'toggleStatus'])
+    ->name('currencies.toggleStatus');
+});
+
+
+
 use App\Http\Controllers\TermsController;
 
 Route::get('/terms', [TermsController::class, 'show'])->name('terms');

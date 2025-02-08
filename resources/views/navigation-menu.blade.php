@@ -36,7 +36,7 @@
                             </x-nav-link>
                             <ul class="absolute left-0 hidden bg-white text-black shadow-lg group-hover:block w-40">
                                 <li>
-                                    <x-nav-dropdown-link href="" :active="request()->routeIs('currencies')">
+                                    <x-nav-dropdown-link href="{{ route('currencies.index') }}" :active="request()->routeIs('currencies.index')">
                                         {{ __('Currencies') }}
                                     </x-nav-dropdown-link>
                                 </li>
@@ -212,7 +212,7 @@
             <x-responsive-sub-menu-nav-link href="/" :active="in_array(Route::currentRouteName(), ['currencies', 'exchanges'])">
                 {{ __('Markets & Assets') }}
                 <div class="px-4">
-                    <x-responsive-nav-link href="/" :active="request()->routeIs('currencies')">
+                    <x-responsive-nav-link href="{{ route('currencies.index') }}" :active="request()->routeIs('currencies.index')">
                         {{ __('Currencies') }}
                     </x-nav-link>
                     <x-responsive-nav-link href="/" :active="request()->routeIs('exchanges')">
