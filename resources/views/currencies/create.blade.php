@@ -7,6 +7,14 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Breadcrumb Navigation -->
+            <x-breadcrumb>
+                <a href="{{ route('dashboard') }}">Dashboard</a>
+                <a href="{{ route('markets.assets') }}">Markets & Assets</a>
+                <a href="{{ route('currencies.index') }}">Currencies</a>
+                <li class="text-gray-500">Add Currency</li>
+            </x-breadcrumb>
+
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
                 @if (session('success'))
                     <div class="mb-4 text-green-600">

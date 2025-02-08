@@ -66,6 +66,11 @@ class CurrencyController extends Controller
             $currency = Currency::findOrFail($curid);
             $currency->status = ($currency->status === 'Active') ? 'Inactive' : 'Active';
             $currency->save();
+
+            // If the currency is now inactive, remove it from all exchange relationships
+            if ($currency->status === 'Inactive') {
+                $currency->exchanges()->detach();
+            }
         } finally {
             DB::disconnect('mysql'); // Close DB connection after update
         }

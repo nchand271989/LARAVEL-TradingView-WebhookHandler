@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
 class Currency extends Model
 {
     use HasFactory;
@@ -27,5 +29,10 @@ class Currency extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'createdBy');
+    }
+
+    public function exchanges(): BelongsToMany
+    {
+        return $this->belongsToMany(Exchange::class, 'exchange_currency', 'currency_id', 'exchange_id');
     }
 }
