@@ -26,7 +26,7 @@
                             </x-nav-link>
                         </li>
                         <li>
-                            <x-nav-link href="" :active="request()->routeIs('strategies')">
+                            <x-nav-link href="{{ route('strategies.index') }}" :active="request()->routeIs('strategies.index')">
                                 {{ __('Strategies') }}
                             </x-nav-link>
                         </li>
@@ -201,7 +201,7 @@
             <x-responsive-nav-link href="/" :active="request()->routeIs('webhooks')">
                 {{ __('Webhooks') }}
             </x-nav-link>
-            <x-responsive-nav-link href="/" :active="request()->routeIs('strategies')">
+            <x-responsive-nav-link href="{{ route('strategies.index') }}" :active="request()->routeIs('strategies.index')">
                 {{ __('Strategies') }}
             </x-nav-link>
             <x-responsive-sub-menu-nav-link href="" :active="in_array(Route::currentRouteName(), ['markets.assets', 'currencies.index', 'exchanges.index'])">

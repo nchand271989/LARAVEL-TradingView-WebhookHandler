@@ -42,6 +42,15 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+use App\Http\Controllers\StrategyController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('/strategies', StrategyController::class);
+    Route::patch('/strategies/{strategy}/toggle-status', [StrategyController::class, 'toggleStatus'])->name('strategies.toggleStatus');
+});
+
+
+
 
 use App\Http\Controllers\TermsController;
 

@@ -12,7 +12,7 @@
                 <a href="{{ route('dashboard') }}">Dashboard</a>
                 <a href="{{ route('markets.assets') }}">Markets & Assets</a>
                 <a href="{{ route('currencies.index') }}">Currencies</a>
-                <li class="text-gray-500">Add Currency</li>
+                <span class="text-gray-500">Add Currency</span>
             </x-breadcrumb>
 
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">

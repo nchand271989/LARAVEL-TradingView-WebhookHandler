@@ -12,11 +12,11 @@
                 <a href="{{ route('dashboard') }}">Dashboard</a>
                 <a href="{{ route('markets.assets') }}">Markets & Assets</a>
                 <a href="{{ route('exchanges.index') }}">Exchanges</a>
-                <li class="text-gray-500">Add Exchange</li>
+                <span class="text-gray-500">{{ isset($exchange) ? 'Edit Exchange' : 'Create Exchange' }}</span>
             </x-breadcrumb>
 
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                <form method="POST" action="{{ isset($exchange) ? route('exchanges.update', $exchange->exid) : route('exchanges.store') }}">
+                <form method="POST" action="{{ isset($exchange) ? route('exchanges.update', $exchange->exid) : route('exchanges.store') }}" id="exchange-form">
                     @csrf
                     @if(isset($exchange))
                         @method('PATCH')
@@ -25,7 +25,8 @@
                     <!-- Exchange Name -->
                     <div class="mb-4">
                         <label class="block text-gray-700 font-bold mb-2">Exchange Name:</label>
-                        <input type="text" name="name" value="{{ old('name', $exchange->name ?? '') }}" required class="w-full border-gray-300 rounded-lg shadow-sm p-2">
+                        <input type="text" name="name" value="{{ old('name', $exchange->name ?? '') }}" required 
+                            class="w-full border-gray-300 rounded-lg shadow-sm p-2">
                         @error('name') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
                     </div>
 
@@ -68,7 +69,7 @@
 
                     <!-- Submit Button -->
                     <div class="mt-4">
-                        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">
+                        <button type="submit" id="submit-btn" class="bg-green-500 text-white px-4 py-2 rounded">
                             {{ isset($exchange) ? 'Update Exchange' : 'Create Exchange' }}
                         </button>
                     </div>
@@ -78,12 +79,30 @@
     </div>
 
     <script>
-        document.getElementById('select-all').addEventListener('click', function() {
-            document.querySelectorAll('.currency-checkbox').forEach(checkbox => checkbox.checked = true);
-        });
+        document.addEventListener("DOMContentLoaded", function() {
+            let form = document.getElementById("exchange-form");
+            let submitBtn = document.getElementById("submit-btn");
 
-        document.getElementById('deselect-all').addEventListener('click', function() {
-            document.querySelectorAll('.currency-checkbox').forEach(checkbox => checkbox.checked = false);
+            // Prevent double form submission
+            form.addEventListener("submit", function(event) {
+                if (submitBtn.disabled) {
+                    event.preventDefault(); // Stop form submission if already disabled
+                    return;
+                }
+                submitBtn.disabled = true; // Disable button to prevent double submission
+                submitBtn.innerText = "Processing..."; // Optional: Change button text
+            });
+
+            // Select all checkboxes
+            document.getElementById('select-all').addEventListener('click', function() {
+                document.querySelectorAll('.currency-checkbox').forEach(checkbox => checkbox.checked = true);
+            });
+
+            // Deselect all checkboxes
+            document.getElementById('deselect-all').addEventListener('click', function() {
+                document.querySelectorAll('.currency-checkbox').forEach(checkbox => checkbox.checked = false);
+            });
         });
     </script>
+
 </x-app-layout>

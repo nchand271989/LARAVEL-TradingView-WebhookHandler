@@ -10,7 +10,7 @@
             <!-- Breadcrumb Navigation -->
             <x-breadcrumb>
                 <a href="{{ route('dashboard') }}">Dashboard</a>
-                <li class="text-gray-500">Markets & Assets</li>
+                <span class="text-gray-500">Markets & Assets</span>
             </x-breadcrumb>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">

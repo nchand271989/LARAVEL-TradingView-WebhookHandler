@@ -15,12 +15,10 @@ class ExchangeController extends Controller
         try {
             $query = Exchange::with('currencies');
 
-            // Search feature
             if ($request->has('search')) {
                 $query->where('name', 'like', "%{$request->search}%");
             }
 
-            // Sorting feature
             if ($request->has('sortBy') && in_array($request->sortBy, ['name', 'status', 'created_at'])) {
                 $query->orderBy($request->sortBy, $request->sortOrder == 'desc' ? 'desc' : 'asc');
             } else {
@@ -32,23 +30,28 @@ class ExchangeController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to fetch exchanges.');
         } finally {
-            DB::disconnect(); // Close DB connection
+            DB::disconnect();
         }
     }
 
-    public function create(Request $request)
+    public function create()
+    {
+        return $this->modifyExchange();
+    }
+
+    public function edit(Exchange $exchange)
+    {
+        return $this->modifyExchange($exchange);
+    }
+
+    private function modifyExchange(Exchange $exchange = null)
     {
         try {
             $currencies = Currency::where('status', 'Active')->get();
-            $exchange = null;
-
-            if ($request->has('id')) {
-                $exchange = Exchange::with('currencies')->find($request->id);
-            }
 
             return view('exchanges.create', compact('currencies', 'exchange'));
         } catch (\Exception $e) {
-            return back()->with('error', 'Failed to fetch currencies.');
+            return back()->with('error', 'Failed to fetch exchange details.');
         } finally {
             DB::disconnect();
         }
@@ -61,6 +64,7 @@ class ExchangeController extends Controller
                 'name' => 'required|string|max:255|unique:exchanges,name',
                 'status' => 'required|in:Active,Inactive',
                 'currencies' => 'array',
+                'currencies.*' => 'exists:currencies,curid',
             ]);
 
             DB::beginTransaction();
@@ -80,24 +84,24 @@ class ExchangeController extends Controller
             return redirect()->route('exchanges.index')->with('success', 'Exchange created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to create exchange.');
+            return back()->with('error', 'Failed to create exchange: ' . $e->getMessage());
         } finally {
-            DB::disconnect(); // Close DB connection
+            DB::disconnect();
         }
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Exchange $exchange)
     {
         try {
             $request->validate([
-                'name' => "required|string|max:255|unique:exchanges,name,$id,exid",
+                'name' => "required|string|max:255|unique:exchanges,name,{$exchange->exid},exid",
                 'status' => 'required|in:Active,Inactive',
                 'currencies' => 'array',
+                'currencies.*' => 'exists:currencies,curid',
             ]);
 
             DB::beginTransaction();
 
-            $exchange = Exchange::findOrFail($id);
             $exchange->update([
                 'name' => $request->name,
                 'status' => $request->status,
@@ -112,16 +116,15 @@ class ExchangeController extends Controller
             return redirect()->route('exchanges.index')->with('success', 'Exchange updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to update exchange.');
+            return back()->with('error', 'Failed to update exchange: ' . $e->getMessage());
         } finally {
             DB::disconnect();
         }
     }
 
-    public function toggleStatus($exchangeId)
+    public function toggleStatus(Exchange $exchange)
     {
         try {
-            $exchange = Exchange::findOrFail($exchangeId);
             $exchange->status = ($exchange->status === 'Active') ? 'Inactive' : 'Active';
             $exchange->save();
 

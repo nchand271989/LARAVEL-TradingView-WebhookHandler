@@ -13,7 +13,7 @@
             <x-breadcrumb>
                 <a href="{{ route('dashboard') }}">Dashboard</a>
                 <a href="{{ route('markets.assets') }}">Markets & Assets</a>
-                <li class="text-gray-500">Exchanges</li>
+                <span class="text-gray-500">Exchanges</span>
             </x-breadcrumb>
 
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
@@ -96,7 +96,7 @@
                                 @if (session('is_admin'))
                                 <td class="py-3 px-6 text-right">
                                     @if ($exchange->status === 'Inactive')
-                                        <a href="{{ route('exchanges.create', ['id' => $exchange->exid]) }}" class="text-blue-500 hover:underline">Edit</a>
+                                        <a href="{{ route('exchanges.edit', $exchange->exid) }}" class="text-blue-500 hover:underline">Edit</a>
                                     @endif
                                 </td>
                                 @endif
