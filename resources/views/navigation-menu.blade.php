@@ -21,7 +21,7 @@
                             </x-nav-link>
                         </li>
                         <li>
-                            <x-nav-link href="" :active="request()->routeIs('webhooks')">
+                            <x-nav-link href="{{ route('webhooks.index') }}" :active="request()->routeIs('webhooks.index')">
                                 {{ __('Webhooks') }}
                             </x-nav-link>
                         </li>

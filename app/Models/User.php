@@ -9,6 +9,9 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Str;
+
+use App\Notifications\CustomVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -19,6 +22,10 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
+
+    protected $keyType = 'string'; // Ensure id is treated as a string
+    public $incrementing = false; // Disable auto-increment
+
 
     /**
      * The attributes that are mass assignable.
@@ -62,6 +69,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
+            'id' => 'string', // Ensure id is treated as a string
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean', // Ensure is_admin is treated as a boolean
@@ -76,7 +84,35 @@ class User extends Authenticatable implements MustVerifyEmail
         parent::boot();
 
         static::creating(function ($user) {
+            if (empty($user->id)) {
+                $user->id = (string) Str::uuid(); // Generate UUID on creation
+            }
             $user->is_admin = false; // Ensure new users are always non-admin
         });
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail());
+    }
+
+    /**
+     * Override the getKey() function to return UUID as a string.
+     */
+    public function getKey()
+    {
+        return (string) $this->id; // Ensures UUID is used instead of integer 0
+    }
+
+    /**
+     * Fix Laravel's routeNotificationFor() to ensure UUIDs work correctly.
+     */
+    public function routeNotificationFor($driver)
+    {
+        if ($driver === 'mail') {
+            return $this->email;
+        }
+
+        return (string) $this->id; // Ensure UUID is used
     }
 }

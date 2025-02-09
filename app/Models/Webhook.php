@@ -6,32 +6,38 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Strategy extends Model
+class Webhook extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'stratid';
+    protected $primaryKey = 'webhid';
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['stratid', 'name', 'pineScript', 'createdBy', 'status'];
+    protected $fillable = ['webhid', 'name', 'stratid', 'createdBy', 'status'];
 
     protected static function boot()
     {
         parent::boot();
-        static::creating(function ($strategy) {
-            $strategy->stratid = (string) Str::uuid();
+        static::creating(function ($webhook) {
+            $webhook->webhid = (string) Str::uuid();
         });
+    }
+
+    public function strategy()
+    {
+        return $this->belongsTo(Strategy::class, 'stratid', 'stratid');
     }
 
     public function attributes()
     {
-        return $this->hasMany(StrategyAttribute::class, 'stratid', 'stratid');
+        return $this->hasMany(WebhookAttribute::class, 'webhid', 'webhid');
     }
-    
 
     public function user()
     {
         return $this->belongsTo(User::class, 'createdBy');
     }
 }
+
+

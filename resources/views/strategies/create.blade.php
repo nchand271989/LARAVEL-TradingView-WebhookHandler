@@ -15,7 +15,7 @@
             </x-breadcrumb>
             <div class="bg-white shadow-md rounded-lg p-6">
                 <!-- Form for Creating or Updating a Strategy -->
-                <form method="POST" action="{{ isset($strategy) ? route('strategies.update', $strategy->strgrid) : route('strategies.store') }}" id="strategy-form">
+                <form method="POST" action="{{ isset($strategy) ? route('strategies.update', $strategy->stratid) : route('strategies.store') }}" id="strategy-form">
                     @csrf
                     @if(isset($strategy))
                         @method('PUT')

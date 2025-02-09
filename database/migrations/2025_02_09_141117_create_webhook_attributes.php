@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('strategy_attributes', function (Blueprint $table) {
+        Schema::create('webhook_attributes', function (Blueprint $table) {
             $table->id();
-            $table->uuid('stratid');
+            $table->uuid('webhid');
             $table->string('attribute_name');
             $table->string('attribute_value');
             $table->timestamps();
-
-            $table->foreign('stratid')->references('stratid')->on('strategies')->onDelete('cascade');
+            $table->foreign('webhid')->references('webhid')->on('webhooks')->onDelete('cascade');
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('strategy_attributes');
+        Schema::dropIfExists('webhook_attributes');
     }
 };

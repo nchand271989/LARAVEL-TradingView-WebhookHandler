@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('currencies', function (Blueprint $table) {
-            $table->uuid('curid')->primary(); // 36-character unique identifier
-            $table->string('name', 100); // Limited to 100 characters
-            $table->string('shortcode', 10)->unique(); // Limited to 10 characters, unique constraint
+        Schema::create('webhooks', function (Blueprint $table) {
+            $table->uuid('webhid')->primary();
+            $table->string('name');
+            $table->uuid('stratid');
+            $table->foreign('stratid')->references('stratid')->on('strategies')->onDelete('cascade');
             $table->uuid('createdBy');
-            $table->timestamps(); // Automatically creates created_at & updated_at
-            $table->enum('status', ['Active', 'Inactive'])->default('Active'); // Only allowed values
+            $table->timestamps();
+            $table->enum('status', ['Active', 'Inactive'])->default('Active');
 
             // Add foreign key constraint AFTER column definition
             $table->foreign('createdBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('currencies');
+        Schema::dropIfExists('webhooks');
     }
 };

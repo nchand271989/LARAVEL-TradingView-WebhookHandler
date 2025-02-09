@@ -59,7 +59,7 @@
                                 <td class="py-3 px-6">{{ $strategy->name }}</td>
                                 <td class="py-3 px-6 text-right">
                                     @if (session('is_admin'))
-                                        <form method="POST" action="{{ route('strategies.toggleStatus', $strategy->strgrid) }}" class="inline hidden sm:inline">
+                                        <form method="POST" action="{{ route('strategies.toggleStatus', $strategy->stratid) }}" class="inline hidden sm:inline">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="px-2 py-1 text-white text-sm font-semibold rounded focus:outline-none 
@@ -83,7 +83,7 @@
                                 @if (session('is_admin'))
                                 <td class="py-3 px-6 text-right">
                                     @if ($strategy->status === 'Inactive')
-                                        <a href="{{ route('strategies.edit', $strategy->strgrid) }}" class="text-blue-500 hover:underline">Edit</a>
+                                        <a href="{{ route('strategies.edit', $strategy->stratid) }}" class="text-blue-500 hover:underline">Edit</a>
                                     @endif    
                                 </td>
                                 @endif

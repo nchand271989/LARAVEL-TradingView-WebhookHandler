@@ -58,7 +58,7 @@ class StrategyController extends Controller
 
             foreach ($request->input('attributes', []) as $attribute) {
                 StrategyAttribute::create([
-                    'strgrid' => $strategy->strgrid,
+                    'stratid' => $strategy->stratid,
                     'attribute_name' => $attribute['name'],
                     'attribute_value' => $attribute['value'],
                 ]);
@@ -102,10 +102,10 @@ class StrategyController extends Controller
                 'pineScript' => $request->pineScript,
             ]);
 
-            StrategyAttribute::where('strgrid', $strategy->strgrid)->delete();
+            StrategyAttribute::where('stratid', $strategy->stratid)->delete();
             foreach ($request->input('attributes', []) as $attribute) {
                 StrategyAttribute::create([
-                    'strgrid' => $strategy->strgrid,
+                    'stratid' => $strategy->stratid,
                     'attribute_name' => $attribute['name'],
                     'attribute_value' => $attribute['value'],
                 ]);

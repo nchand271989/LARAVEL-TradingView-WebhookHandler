@@ -33,6 +33,6 @@ class Currency extends Model
 
     public function exchanges(): BelongsToMany
     {
-        return $this->belongsToMany(Exchange::class, 'exchange_currency', 'currency_id', 'exchange_id');
+        return $this->belongsToMany(Exchange::class, 'exchange_currency', 'curid', 'exid');
     }
 }

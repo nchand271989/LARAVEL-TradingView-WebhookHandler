@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('privacy_policies'); // Drop the table if it exists
         Schema::create('privacy_policies', function (Blueprint $table) {
-            $table->id('sl_no'); // Auto-incrementing primary key (sl.no)
-            $table->uuid('pid')->unique(); // UUID for Privacy Policy ID (pid)
+            $table->uuid('pid')->primary(); // UUID for Privacy Policy ID (pid)
             $table->text('content')->nullable(); // Allow nullable content column (no default value)
             $table->string('version'); // Version to track changes
             $table->timestamps(); // Timestamps (created_at, updated_at)

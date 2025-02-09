@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('exchange_currency', function (Blueprint $table) {
-            $table->uuid('exchange_id');
-            $table->uuid('currency_id');
-            $table->foreign('exchange_id')->references('exid')->on('exchanges')->onDelete('cascade');
-            $table->foreign('currency_id')->references('curid')->on('currencies')->onDelete('cascade');
-            $table->primary(['exchange_id', 'currency_id']);
+            $table->uuid('exid');
+            $table->uuid('curid');
+            $table->foreign('exid')->references('exid')->on('exchanges')->onDelete('cascade');
+            $table->foreign('curid')->references('curid')->on('currencies')->onDelete('cascade');
+            $table->primary(['exid', 'curid']);
         });
     }
 

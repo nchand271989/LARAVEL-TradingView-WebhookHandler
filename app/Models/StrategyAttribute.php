@@ -9,10 +9,10 @@ class StrategyAttribute extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['strgrid', 'attribute_name', 'attribute_value'];
+    protected $fillable = ['stratid', 'attribute_name', 'attribute_value'];
 
     public function strategy()
     {
-        return $this->belongsTo(Strategy::class, 'strgrid', 'strgrid');
+        return $this->belongsTo(Strategy::class, 'stratid', 'stratid');
     }
 }

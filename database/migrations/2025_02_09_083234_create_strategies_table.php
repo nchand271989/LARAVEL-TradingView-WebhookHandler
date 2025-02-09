@@ -12,12 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('strategies', function (Blueprint $table) {
-            $table->uuid('strgrid')->primary();
+            $table->uuid('stratid')->primary();
             $table->string('name');
             $table->text('pineScript');
-            $table->foreignId('createdBy')->constrained('users')->onDelete('cascade');
+            $table->uuid('createdBy');
             $table->timestamps();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
+
+            // Add foreign key constraint AFTER column definition
+            $table->foreign('createdBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
         });
     }
 

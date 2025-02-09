@@ -6,6 +6,27 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $user = \App\Models\User::where('id', $request->route('id'))->firstOrFail();
+    
+        if (!hash_equals((string) $request->route('hash'), sha1($user->email))) {
+            abort(403);
+        }
+    
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
+    
+        return redirect('/dashboard')->with('verified', true);
+    })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
+});
+
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -48,6 +69,13 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/strategies', StrategyController::class);
     Route::patch('/strategies/{strategy}/toggle-status', [StrategyController::class, 'toggleStatus'])->name('strategies.toggleStatus');
 });
+
+use App\Http\Controllers\WebhookController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('webhooks', WebhookController::class)->except(['edit', 'update']);
+});
+
 
 
 

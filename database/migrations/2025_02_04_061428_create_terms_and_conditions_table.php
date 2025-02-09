@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('terms_and_conditions'); // Drop the table if it exists
         Schema::create('terms_and_conditions', function (Blueprint $table) {
-            $table->id('sl_no'); // Auto-incrementing primary key (sl.no)
-            $table->uuid('tid')->unique(); // UUID for Terms and Conditions ID (tid)
+            $table->uuid('tid')->primary(); // UUID for Terms and Conditions ID (tid) as Primary key
             $table->text('content')->nullable(); // Allow nullable content column (no default value)
             $table->string('version'); // Version to track changes
             $table->timestamps(); // Timestamps (created_at, updated_at)
