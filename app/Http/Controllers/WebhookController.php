@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\Webhook;
 use App\Models\WebhookAttribute;
 use App\Models\Strategy;
@@ -29,6 +30,19 @@ class WebhookController extends Controller
         return view('webhooks.create', compact('strategies'));
     }
 
+    public function edit(Webhook $webhook)
+    {
+        try {
+            $webhook->load('attributes');
+            $strategies = Strategy::with('attributes')->get();
+        } finally {
+            DB::disconnect();
+        }
+
+        return view('webhooks.create', compact('webhook', 'strategies'));
+    }
+
+
     public function store(Request $request)
     {
         try {
@@ -45,7 +59,8 @@ class WebhookController extends Controller
                 'name' => $request->name,
                 'stratid' => $request->stratid,
                 'createdBy' => auth()->id(),
-                'status' => 'Active',
+                'status' => $request->status,
+                'lastUpdatedBy' => auth()->id(),
             ]);
 
             if ($request->has('attributes')) {
@@ -71,5 +86,52 @@ class WebhookController extends Controller
     {
         $webhook->delete();
         return back()->with('success', 'Webhook deleted successfully.');
+    }
+
+    public function update(Request $request, Webhook $webhook)
+    {
+        try {
+            $request->validate([
+                'name' => 'required',
+                'stratid' => 'required|exists:strategies,stratid',
+                'attributes.*.name' => 'required|string|max:255',
+                'attributes.*.value' => 'required|string|max:255',
+            ]);
+
+            DB::beginTransaction();
+
+            $webhook->update([
+                'name' => $request->name,
+                'stratid' => $request->stratid,
+                'status' => $request->status,
+                'lastUpdatedBy' => auth()->id(),
+            ]);
+
+            // Delete old attributes
+            WebhookAttribute::where('webhid', $webhook->webhid)->delete();
+
+            // Insert new attributes
+            if ($request->has('attributes')) {
+                foreach ($request->input('attributes', []) as $attribute) {
+                    WebhookAttribute::create([
+                        'webhid' => $webhook->webhid,
+                        'attribute_name' => $attribute['name'],
+                        'attribute_value' => $attribute['value'],
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('webhooks.index')->with('success', 'Webhook updated successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error updating webhook: ' . $e->getMessage());
+        }
+    }
+
+    public function toggleStatus(Webhook $webhook)
+    {
+        $webhook->update(['status' => $webhook->status === 'Active' ? 'Inactive' : 'Active']);
+        return redirect()->route('webhooks.index');
     }
 }

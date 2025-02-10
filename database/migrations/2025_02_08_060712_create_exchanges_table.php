@@ -15,11 +15,13 @@ return new class extends Migration
             $table->uuid('exid')->primary();
             $table->string('name', 255)->unique();
             $table->uuid('createdBy');
+            $table->uuid('lastUpdatedBy');
             $table->timestamps();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
 
             // Add foreign key constraint AFTER column definition
             $table->foreign('createdBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
+            $table->foreign('lastUpdatedBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
         });
     }
 

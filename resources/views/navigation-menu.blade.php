@@ -198,7 +198,7 @@
             <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link href="/" :active="request()->routeIs('webhooks')">
+            <x-responsive-nav-link href="{{ route('webhooks.index') }}" :active="request()->routeIs('webhooks.index')">
                 {{ __('Webhooks') }}
             </x-nav-link>
             <x-responsive-nav-link href="{{ route('strategies.index') }}" :active="request()->routeIs('strategies.index')">
@@ -210,7 +210,7 @@
                     <x-responsive-nav-link href="{{ route('currencies.index') }}" :active="request()->routeIs('currencies.index')">
                         {{ __('Currencies') }}
                     </x-nav-link>
-                    <x-responsive-nav-link href="/" :active="request()->routeIs('exchanges')">
+                    <x-responsive-nav-link href="{{ route('exchanges.index') }}" :active="request()->routeIs('exchanges.index')">
                         {{ __('Exchanges') }}
                     </x-nav-link>
                 </div>

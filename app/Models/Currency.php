@@ -16,7 +16,7 @@ class Currency extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['curid', 'name', 'shortcode', 'createdBy', 'status'];
+    protected $fillable = ['curid', 'name', 'shortcode', 'createdBy', 'lastUpdatedBy', 'status'];
 
     protected static function boot()
     {

@@ -14,7 +14,7 @@ class Webhook extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['webhid', 'name', 'stratid', 'createdBy', 'status'];
+    protected $fillable = ['webhid', 'name', 'stratid', 'createdBy', 'lastUpdatedBy', 'status'];
 
     protected static function boot()
     {

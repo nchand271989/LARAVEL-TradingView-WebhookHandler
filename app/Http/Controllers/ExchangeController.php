@@ -7,6 +7,7 @@ use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ExchangeController extends Controller
 {
@@ -60,12 +61,7 @@ class ExchangeController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'name' => 'required|string|max:255|unique:exchanges,name',
-                'status' => 'required|in:Active,Inactive',
-                'currencies' => 'array',
-                'currencies.*' => 'exists:currencies,curid',
-            ]);
+            Log::info('Exchange store method triggered', ['request' => $request->all()]);
 
             DB::beginTransaction();
 
@@ -73,17 +69,24 @@ class ExchangeController extends Controller
                 'name' => $request->name,
                 'status' => $request->status,
                 'createdBy' => Auth::id(),
+                'lastUpdatedBy' => Auth::id(),
             ]);
+
+            Log::info('Exchange created', ['exchange' => $exchange]);
 
             if ($request->has('currencies')) {
                 $exchange->currencies()->attach($request->currencies);
+                Log::info('Currencies attached to exchange', ['currencies' => $request->currencies]);
             }
 
             DB::commit();
+            Log::info('Transaction committed');
 
             return redirect()->route('exchanges.index')->with('success', 'Exchange created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Failed to create exchange', ['error' => $e->getMessage()]);
+
             return back()->with('error', 'Failed to create exchange: ' . $e->getMessage());
         } finally {
             DB::disconnect();
@@ -105,6 +108,7 @@ class ExchangeController extends Controller
             $exchange->update([
                 'name' => $request->name,
                 'status' => $request->status,
+                'lastUpdatedBy' => Auth::id(),
             ]);
 
             if ($request->has('currencies')) {

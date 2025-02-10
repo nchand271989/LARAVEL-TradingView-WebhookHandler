@@ -25,7 +25,7 @@
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">Strategy Name</label>
                         <input type="text" name="name" id="name" value="{{ old('name', $strategy->name ?? '') }}"
-                               class="border rounded p-2 w-full">
+                               class="border rounded p-2 w-full" required>
                         @error('name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -34,7 +34,7 @@
                     <!-- Pine Script -->
                     <div class="mt-4">
                         <label for="pineScript" class="block text-sm font-medium text-gray-700">Pine Script</label>
-                        <textarea name="pineScript" id="pineScript" rows="10" class="border rounded p-2 w-full">{{ old('pineScript', $strategy->pineScript ?? '') }}</textarea>
+                        <textarea name="pineScript" id="pineScript" rows="10" class="border rounded p-2 w-full" required>{{ old('pineScript', $strategy->pineScript ?? '') }}</textarea>
                         @error('pineScript')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
@@ -47,8 +47,8 @@
                             @if(isset($strategy) && $strategy->attributes->count() > 0)
                                 @foreach($strategy->attributes as $index => $attribute)
                                     <div class="flex gap-2 mb-2 attribute-row">
-                                        <input type="text" name="attributes[{{ $index }}][name]" value="{{ $attribute->attribute_name }}" placeholder="Attribute Name" class="border rounded p-2 w-1/2">
-                                        <input type="text" name="attributes[{{ $index }}][value]" value="{{ $attribute->attribute_value }}" placeholder="Attribute Value" class="border rounded p-2 w-1/2">
+                                        <input type="text" name="attributes[{{ $index }}][name]" value="{{ $attribute->attribute_name }}" placeholder="Attribute Name" class="border rounded p-2 w-1/2" required>
+                                        <input type="text" name="attributes[{{ $index }}][value]" value="{{ $attribute->attribute_value }}" placeholder="Attribute Value" class="border rounded p-2 w-1/2" required>
                                         <button type="button" class="rounded remove-attribute"><x-close-icon class="block h-[40px] w-auto" /></button>
                                     </div>
                                 @endforeach
@@ -63,6 +63,14 @@
                         <div class="flex justify-start">
                             <button type="button" id="add-attribute" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">+ Add Attribute</button>
                         </div>
+                    </div>
+
+                    <!-- Auto Reverse Order Checkbox -->
+                    <div class="mt-4 flex items-center">
+                    <input type="checkbox" name="auto_reverse_order" id="auto_reverse_order"
+                    class="form-checkbox h-5 w-5 text-blue-600"
+                    {{ isset($strategy) ? ($strategy->auto_reverse_order ? 'checked' : '') : 'checked' }}>
+                        <label for="auto_reverse_order" class="ml-2 text-sm font-medium text-gray-700">Auto Reverse Order</label>
                     </div>
 
                      <!-- Status -->
@@ -99,8 +107,8 @@
                 let row = document.createElement("div");
                 row.classList.add("flex", "gap-2", "mb-2", "attribute-row");
                 row.innerHTML = `
-                    <input type="text" name="attributes[${index}][name]" placeholder="Attribute Name" class="border rounded p-2 w-1/2">
-                    <input type="text" name="attributes[${index}][value]" placeholder="Attribute Value" class="border rounded p-2 w-1/2">
+                    <input type="text" name="attributes[${index}][name]" placeholder="Attribute Name" class="border rounded p-2 w-1/2" required>
+                    <input type="text" name="attributes[${index}][value]" placeholder="Attribute Value" class="border rounded p-2 w-1/2" required>
                     <button type="button" class="rounded remove-attribute"><x-close-icon class="block h-[40px] w-auto" /></button>
                 `;
                 container.appendChild(row);

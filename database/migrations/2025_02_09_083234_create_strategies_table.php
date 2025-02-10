@@ -15,12 +15,15 @@ return new class extends Migration
             $table->uuid('stratid')->primary();
             $table->string('name');
             $table->text('pineScript');
+            $table->boolean('auto_reverse_order')->default(true);
             $table->uuid('createdBy');
+            $table->uuid('lastUpdatedBy');
             $table->timestamps();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
 
             // Add foreign key constraint AFTER column definition
             $table->foreign('createdBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
+            $table->foreign('lastUpdatedBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
         });
     }
 

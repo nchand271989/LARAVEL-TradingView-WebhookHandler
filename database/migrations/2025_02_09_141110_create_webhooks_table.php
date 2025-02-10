@@ -17,11 +17,13 @@ return new class extends Migration
             $table->uuid('stratid');
             $table->foreign('stratid')->references('stratid')->on('strategies')->onDelete('cascade');
             $table->uuid('createdBy');
+            $table->uuid('lastUpdatedBy');
             $table->timestamps();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
 
             // Add foreign key constraint AFTER column definition
             $table->foreign('createdBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
+            $table->foreign('lastUpdatedBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
         });
     }
 

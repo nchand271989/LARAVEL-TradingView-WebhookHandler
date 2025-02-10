@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\Strategy;
 use App\Models\StrategyAttribute;
 use Illuminate\Http\Request;
@@ -53,7 +54,9 @@ class StrategyController extends Controller
                 'name' => $request->name,
                 'pineScript' => $request->pineScript,
                 'createdBy' => auth()->id(),
-                'status' => 'Active',
+                'status' => $request->status,
+                'auto_reverse_order' => $request->has('auto_reverse_order'),
+                'lastUpdatedBy' => auth()->id(),
             ]);
 
             foreach ($request->input('attributes', []) as $attribute) {
@@ -100,6 +103,9 @@ class StrategyController extends Controller
             $strategy->update([
                 'name' => $request->name,
                 'pineScript' => $request->pineScript,
+                'status' => $request->status,
+                'auto_reverse_order' => $request->has('auto_reverse_order'),
+                'lastUpdatedBy' => auth()->id(),
             ]);
 
             StrategyAttribute::where('stratid', $strategy->stratid)->delete();

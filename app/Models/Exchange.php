@@ -15,7 +15,7 @@ class Exchange extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['name', 'createdBy', 'status'];
+    protected $fillable = ['name', 'createdBy', 'lastUpdatedBy', 'status'];
 
     public function currencies(): BelongsToMany
     {

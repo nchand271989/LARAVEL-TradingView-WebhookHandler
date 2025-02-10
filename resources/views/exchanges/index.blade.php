@@ -54,7 +54,7 @@
                                 </a>
                             </th>
                             @if (session('is_admin'))
-                                <th class="py-3 px-6 text-right hidden sm:block">Actions</th>
+                                <th class="hidden sm:block py-3 px-6 text-right hidden sm:block">Actions</th>
                             @endif
                         </tr>
                     </thead>
@@ -94,7 +94,7 @@
                                     @endif    
                                 </td>
                                 @if (session('is_admin'))
-                                <td class="py-3 px-6 text-right">
+                                <td class="hidden sm:block py-3 px-6 text-right">
                                     @if ($exchange->status === 'Inactive')
                                         <a href="{{ route('exchanges.edit', $exchange->exid) }}" class="text-blue-500 hover:underline">Edit</a>
                                     @endif

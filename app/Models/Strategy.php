@@ -14,7 +14,7 @@ class Strategy extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['stratid', 'name', 'pineScript', 'createdBy', 'status'];
+    protected $fillable = ['stratid', 'name', 'pineScript', 'auto_reverse_order', 'createdBy', 'lastUpdatedBy', 'status'];
 
     protected static function boot()
     {

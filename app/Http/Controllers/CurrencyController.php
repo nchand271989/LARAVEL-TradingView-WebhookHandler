@@ -52,6 +52,7 @@ class CurrencyController extends Controller
                 'shortcode' => $request->shortcode,
                 'status' => $request->status,
                 'createdBy' => Auth::id(),
+                'lastUpdatedBy' => auth()->id(),
             ]);
         } finally {
             DB::disconnect('mysql'); // Ensure DB connection is closed
