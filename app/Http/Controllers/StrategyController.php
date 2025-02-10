@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\Strategy;
 use App\Models\StrategyAttribute;
 use Illuminate\Http\Request;
@@ -12,7 +13,11 @@ class StrategyController extends Controller
 {
     public function index(Request $request)
     {
+        $userId = Auth::id();
+
         try {
+            Log::info('Fetching strategies', ['user_id' => $userId, 'search' => $request->search]);
+
             $query = Strategy::with('attributes');
 
             if ($request->has('search')) {
@@ -26,8 +31,13 @@ class StrategyController extends Controller
             }
 
             $strategies = $query->paginate(10);
+            Log::info('Fetched strategies successfully', ['user_id' => $userId, 'count' => $strategies->count()]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching strategies', ['user_id' => $userId, 'error' => $e->getMessage()]);
+            return back()->with('error', 'Failed to fetch strategies.');
         } finally {
-            DB::disconnect('mysql');
+            DB::disconnect();
+            Log::info('Database connection closed', ['user_id' => $userId]);
         }
 
         return view('strategies.index', compact('strategies'));
@@ -35,12 +45,18 @@ class StrategyController extends Controller
 
     public function create()
     {
+        $userId = Auth::id();
+        Log::info('Navigating to create strategy page', ['user_id' => $userId]);
         return view('strategies.create');
     }
 
     public function store(Request $request)
     {
+        $userId = Auth::id();
+
         try {
+            Log::info('Storing a new strategy', ['user_id' => $userId, 'request' => $request->all()]);
+
             $request->validate([
                 'name' => 'required|string|max:255',
                 'pineScript' => 'required|string',
@@ -53,11 +69,13 @@ class StrategyController extends Controller
             $strategy = Strategy::create([
                 'name' => $request->name,
                 'pineScript' => $request->pineScript,
-                'createdBy' => auth()->id(),
+                'createdBy' => $userId,
                 'status' => $request->status,
                 'auto_reverse_order' => $request->has('auto_reverse_order'),
-                'lastUpdatedBy' => auth()->id(),
+                'lastUpdatedBy' => $userId,
             ]);
+
+            Log::info('Strategy created successfully', ['user_id' => $userId, 'strategy_id' => $strategy->stratid]);
 
             foreach ($request->input('attributes', []) as $attribute) {
                 StrategyAttribute::create([
@@ -68,21 +86,32 @@ class StrategyController extends Controller
             }
 
             DB::commit();
+            Log::info('Strategy stored successfully', ['user_id' => $userId, 'strategy_id' => $strategy->stratid]);
+
             return redirect()->route('strategies.index')->with('success', 'Strategy created successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error storing strategy', ['user_id' => $userId, 'error' => $e->getMessage()]);
             return redirect()->route('strategies.create')->with('error', 'Error: ' . $e->getMessage());
         } finally {
-            DB::disconnect('mysql');
+            DB::disconnect();
+            Log::info('Database connection closed', ['user_id' => $userId]);
         }
     }
 
     public function edit(Strategy $strategy)
     {
+        $userId = Auth::id();
+
         try {
+            Log::info('Fetching strategy for editing', ['user_id' => $userId, 'strategy_id' => $strategy->stratid]);
             $strategy->load('attributes');
+        } catch (\Exception $e) {
+            Log::error('Error fetching strategy for edit', ['user_id' => $userId, 'error' => $e->getMessage()]);
+            return back()->with('error', 'Failed to load strategy.');
         } finally {
-            DB::disconnect('mysql');
+            DB::disconnect();
+            Log::info('Database connection closed', ['user_id' => $userId]);
         }
 
         return view('strategies.create', compact('strategy'));
@@ -90,7 +119,11 @@ class StrategyController extends Controller
 
     public function update(Request $request, Strategy $strategy)
     {
+        $userId = Auth::id();
+
         try {
+            Log::info('Updating strategy', ['user_id' => $userId, 'strategy_id' => $strategy->stratid]);
+
             $request->validate([
                 'name' => 'required|string|max:255',
                 'pineScript' => 'required|string',
@@ -105,8 +138,10 @@ class StrategyController extends Controller
                 'pineScript' => $request->pineScript,
                 'status' => $request->status,
                 'auto_reverse_order' => $request->has('auto_reverse_order'),
-                'lastUpdatedBy' => auth()->id(),
+                'lastUpdatedBy' => $userId,
             ]);
+
+            Log::info('Strategy updated successfully', ['user_id' => $userId, 'strategy_id' => $strategy->stratid]);
 
             StrategyAttribute::where('stratid', $strategy->stratid)->delete();
             foreach ($request->input('attributes', []) as $attribute) {
@@ -118,18 +153,45 @@ class StrategyController extends Controller
             }
 
             DB::commit();
+            Log::info('Strategy update committed', ['user_id' => $userId, 'strategy_id' => $strategy->stratid]);
+
             return redirect()->route('strategies.index')->with('success', 'Strategy updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Error updating strategy', ['user_id' => $userId, 'error' => $e->getMessage()]);
             return back()->with('error', 'Error: ' . $e->getMessage());
         } finally {
-            DB::disconnect('mysql');
+            DB::disconnect();
+            Log::info('Database connection closed', ['user_id' => $userId]);
         }
     }
 
     public function toggleStatus(Strategy $strategy)
     {
-        $strategy->update(['status' => $strategy->status === 'Active' ? 'Inactive' : 'Active']);
-        return redirect()->route('strategies.index');
+        $userId = Auth::id();
+
+        try {
+            Log::info('Toggling strategy status', [
+                'user_id' => $userId,
+                'strategy_id' => $strategy->stratid,
+                'current_status' => $strategy->status
+            ]);
+
+            $strategy->update(['status' => $strategy->status === 'Active' ? 'Inactive' : 'Active']);
+
+            Log::info('Strategy status updated', [
+                'user_id' => $userId,
+                'strategy_id' => $strategy->stratid,
+                'new_status' => $strategy->status
+            ]);
+
+            return redirect()->route('strategies.index')->with('success', 'Strategy status updated.');
+        } catch (\Exception $e) {
+            Log::error('Error toggling strategy status', ['user_id' => $userId, 'error' => $e->getMessage()]);
+            return back()->with('error', 'Failed to update strategy status.');
+        } finally {
+            DB::disconnect();
+            Log::info('Database connection closed', ['user_id' => $userId]);
+        }
     }
 }
