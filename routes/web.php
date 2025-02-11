@@ -8,6 +8,8 @@ use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\ExchangeController;
 use App\Http\Controllers\StrategyController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\WalletController;
+use App\Http\Controllers\ScenarioController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -58,6 +60,20 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('/markets-assets/exchanges', ExchangeController::class)->except(['destroy']);
     Route::patch('/markets-assets/exchanges/{exid}/toggle-status', [ExchangeController::class, 'toggleStatus'])
     ->name('exchanges.toggleStatus');
+
+    // Wallets
+    Route::get('/wallets', [WalletController::class, 'index'])->name('wallets.index');
+    Route::get('/wallets/create', [WalletController::class, 'create'])->name('wallets.create');
+    Route::post('/wallets', [WalletController::class, 'store'])->name('wallets.store');
+    Route::post('/wallets/{wltid}/topup', [WalletController::class, 'topUp'])->name('wallets.topup');
+    Route::patch('/wallets/{wltid}/toggle-status', [WalletController::class, 'toggleStatus'])
+    ->name('wallets.toggleStatus');
+
+    //Scenarios
+    Route::resource('scenarios', ScenarioController::class)->middleware('auth');
+    Route::post('/wallets/{wltid}/assign-scenario', [ScenarioController::class, 'assignToWallet'])->name('wallets.assignScenario');
+
+
 
 
     // Strategies

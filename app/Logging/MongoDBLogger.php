@@ -29,13 +29,13 @@ class MongoDBLogger extends AbstractProcessingHandler
     protected function write(LogRecord $record): void
     {
         $this->collection->insertOne([
-            'user_id' => (string) Auth::id(),
+            'user_id' => (string) (Auth::id() ?? ''), // Use empty string if Auth::id() is null
             'message' => $record->message,
             'channel' => $record->channel,
             'level' => $record->level->name,
             'context' => (array) $record->context,  // Convert object to array
             'extra' => (array) $record->extra,      // Convert object to array
             'datetime' => $record->datetime->format('Y-m-d H:i:s'),
-        ]);
+        ]);        
     }
 }

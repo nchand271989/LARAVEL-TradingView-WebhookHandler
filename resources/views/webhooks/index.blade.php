@@ -35,7 +35,13 @@
                     <tbody>
                         @foreach ($webhooks as $webhook)
                             <tr class="border-b">
-                                <td class="p-2 text-left">{{ $webhook->name }}</td>
+                                <td class="p-2 text-left">
+                                    {{ $webhook->name }}
+                                    <br/>
+                                    <small class="text-gray-500 cursor-pointer text-blue-500 underline" onclick="copyToClipboard('{{ url('/api/' . env('HOOK_KEY') . '/' . $webhook->createdBy . '/' . $webhook->webhid . '/' . $webhook->stratid . '/' . hash('sha256', env('HASH_KEY') . $webhook->createdBy . $webhook->webhid . $webhook->stratid)) }}')">
+                                        Click here to copy URL
+                                    </small>
+                                </td>
                                 <td class="p-2 text-left">{{ $webhook->strategy->name }}</td>
                                 <td class="p-2 text-right">
                                     @if (session('is_admin'))
@@ -94,6 +100,29 @@
             </form>
         </x-slot>
     </x-dialog-modal>
+
+    <!-- Notification -->
+    <div id="copy-notification" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hidden">
+        Webhook URL Copied!
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        function copyToClipboard(url) {
+            navigator.clipboard.writeText(url).then(() => {
+            let notification = document.getElementById('copy-notification');
+            notification.classList.remove('hidden');
+                                            
+            
+            // Hide notification after 2 seconds
+            setTimeout(() => {
+                    notification.classList.add('hidden');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+    </script>
 
     <!-- JavaScript -->
     <script>

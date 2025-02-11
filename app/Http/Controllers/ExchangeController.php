@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exchange;
+use App\Models\ExchangeWallet;
 use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -144,6 +145,10 @@ class ExchangeController extends Controller
             
             $exchange->status = ($exchange->status === 'Active') ? 'Inactive' : 'Active';
             $exchange->save();
+
+            if ($exchange->status === 'Inactive') {
+                ExchangeWallet::where('exid', $exid)->update(['status' => 'Inactive']);
+            }
 
             Log::info('Exchange status for exchangeId '.$exid.', '.$exchange->name.' toggled to '.$exchange->status, ['exchange_id' => $exchange->exid, 'status' => $exchange->status]);
             

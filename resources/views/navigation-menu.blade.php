@@ -45,6 +45,16 @@
                                         {{ __('Exchanges') }}
                                     </x-nav-dropdown-link>
                                 </li>
+                                <li>
+                                    <x-nav-dropdown-link href="{{ route('wallets.index') }}" :active="request()->routeIs('wallets.index')">
+                                        {{ __('Wallets') }}
+                                    </x-nav-dropdown-link>
+                                </li>
+                                <li>
+                                    <x-nav-dropdown-link href="{{ route('wallets.index') }}" :active="request()->routeIs('wallets.index')">
+                                        {{ __('Scenarios') }}
+                                    </x-nav-dropdown-link>
+                                </li>
                             </ul>
                         </li>
                         @if (session('is_admin'))
@@ -212,6 +222,9 @@
                     </x-nav-link>
                     <x-responsive-nav-link href="{{ route('exchanges.index') }}" :active="request()->routeIs('exchanges.index')">
                         {{ __('Exchanges') }}
+                    </x-nav-link>
+                    <x-responsive-nav-link href="{{ route('wallets.index') }}" :active="request()->routeIs('wallets.index')">
+                        {{ __('Wallets') }}
                     </x-nav-link>
                 </div>
             </x-responsive-sub-menu-nav-link>
