@@ -16,25 +16,20 @@ class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules;
 
-    /**
-     * Validate and create a newly registered user.
-     *
-     * @param  array<string, string>  $input
-     */
+    /** Validate and create a newly registered user. @param  array<string, string>  $input */
     public function create(array $input): User
     {
-        // Fetch tid and pid from cookies (if available)
-        $tid = Cookie::get('tid');
-        $pid = Cookie::get('pid');
+        $tid = Cookie::get('tid');                                                                              // Fetch tid from cookies (if available)
+        $pid = Cookie::get('pid');                                                                              // Fetch pid from cookies (if available)
 
         // If tid or pid is not available, set default values
         if (!$tid) {
-            $terms = TermsAndConditions::latest()->first(); // Get the latest terms
+            $terms = TermsAndConditions::latest()->first();                                                     // Get the latest terms & conditions
             $tid = $terms ? $terms->tid : null;
         }
 
         if (!$pid) {
-            $privacyPolicy = PrivacyPolicy::latest()->first(); // Get the latest privacy policy
+            $privacyPolicy = PrivacyPolicy::latest()->first();                                                  // Get the latest privacy policy
             $pid = $privacyPolicy ? $privacyPolicy->pid : null;
         }
 
@@ -46,11 +41,11 @@ class CreateNewUser implements CreatesNewUsers
         ])->validate();
 
         return User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'password' => Hash::make($input['password']),
-            'tid' => $tid, // Set tid
-            'pid' => $pid, // Set pid
+            'name' => $input['name'],                                                                           // Store the user's full name from input
+            'email' => $input['email'],                                                                         // Store the user's email address from input
+            'password' => Hash::make($input['password']),                                                       // Hash and securely store the user's password
+            'terms_and_conditions_id' => $tid,                                                                  // Store the ID of the agreed Terms and Conditions
+            'privacy_policy_id' => $pid,                                                                        // Store the ID of the agreed Privacy Policy
         ]);
     }
 }

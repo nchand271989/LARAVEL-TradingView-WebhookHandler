@@ -23,18 +23,16 @@ class MongoDBLogger extends AbstractProcessingHandler
         $this->collection = $client->$database->$collection;
     }
 
-    /**
-     * Writes log records to MongoDB.
-     */
+    /** Writes log records to MongoDB. */
     protected function write(LogRecord $record): void
     {
         $this->collection->insertOne([
-            'user_id' => (string) (Auth::id() ?? ''), // Use empty string if Auth::id() is null
+            'user_id' => (string) (Auth::id() ?? ''),                                                               // Use empty string if Auth::id() is null
             'message' => $record->message,
             'channel' => $record->channel,
             'level' => $record->level->name,
-            'context' => (array) $record->context,  // Convert object to array
-            'extra' => (array) $record->extra,      // Convert object to array
+            'context' => (array) $record->context,
+            'extra' => (array) $record->extra,
             'datetime' => $record->datetime->format('Y-m-d H:i:s'),
         ]);        
     }

@@ -9,12 +9,11 @@ use Carbon\Carbon;
 
 class CustomVerifyEmail extends BaseVerifyEmail
 {
-    /**
-     * Get the verification URL for the given notifiable.
-     */
+    /** Get the verification URL for the given notifiable. */
     protected function verificationUrl($notifiable)
     {
-        \Log::info('Verification Email Sent', [
+        
+        logger()->info('Verification Email Sent', [
             'User ID' => $notifiable->id,
             'User getKey()' => $notifiable->getKey(),
             'Email' => $notifiable->email
@@ -31,9 +30,7 @@ class CustomVerifyEmail extends BaseVerifyEmail
     }
 
 
-    /**
-     * Get the mail representation of the notification.
-     */
+    /** Get the mail representation of the notification. */
     public function toMail($notifiable)
     {
         $verificationUrl = $this->verificationUrl($notifiable);

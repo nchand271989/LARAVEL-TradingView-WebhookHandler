@@ -6,19 +6,15 @@ use Illuminate\Validation\Rules\Password;
 
 trait PasswordValidationRules
 {
-    /**
-     * Get the validation rules used to validate passwords.
-     *
-     * @return array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>
-     */
+    /** Get the validation rules used to validate passwords. @return array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string> */
     protected function passwordRules(): array
     {
         return [
             'required', 
             'string', 
-            Password::min(6) // Minimum 6 characters
-                ->mixedCase() // At least one uppercase letter
-                ->symbols(), // At least one special character
+            Password::min(6)                                                                            // Minimum 6 characters
+                ->mixedCase()                                                                           // At least one uppercase letter
+                ->symbols(),                                                                            // At least one special character
             'confirmed'];
     }
 }

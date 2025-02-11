@@ -9,7 +9,7 @@ class TermsAndConditions extends Model
 {
     use HasFactory;
 
-    protected $table = 'terms_and_conditions'; // Ensure this matches your database table
+    protected $table = 'terms_and_conditions';
 
     protected $fillable = ['tid', 'content', 'version'];
 }

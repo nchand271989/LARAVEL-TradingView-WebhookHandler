@@ -9,7 +9,7 @@ class PrivacyPolicy extends Model
 {
     use HasFactory;
 
-    protected $table = 'privacy_policies'; // Ensure this matches your database table
+    protected $table = 'privacy_policies';
 
     protected $fillable = ['pid', 'content', 'version'];
 }

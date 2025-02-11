@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Http\Request;
 use App\Models\TermsAndConditions;
-use App\Http\Controllers\Controller; // Import the base Controller class
 
 class TermsController extends Controller
 {
@@ -20,19 +18,26 @@ class TermsController extends Controller
                 return abort(404, 'Terms not found');
             }
 
-            $storedVersion = $request->cookie('terms_version');
-            $newVersion = $terms->version;
+            $storedVersion = $request->cookie('terms_version');                              // Older version of Terms & Conditions stored in cookies
+            
+            $newVersion = $terms->version;                                                   // Latest version of Terms & Conditions
 
 
+            /** Check if Terms & Condition is updated */
             if ($storedVersion !== $newVersion) {
-                Cookie::queue('tid', $terms->tid, 60 * 24 * 30); // Store for 30 days
-                Cookie::queue('terms_version', $newVersion, 60 * 24 * 30); // Store version for 30 days
+
+                /** Store Terms & Conditions version and IDs in cookies */ 
+                Cookie::queue('tid', $terms->tid, 60 * 24 * 30);                             // Store for 30 days
+                Cookie::queue('terms_version', $newVersion, 60 * 24 * 30);                   // Store version for 30 days
             }
 
             return view('terms', ['terms' => $terms->content]);
 
         } catch (\Exception $e) {
-            Log::error('Error fetching terms and conditions', ['error' => $e->getMessage()]);
+
+            /** Logging */
+            logger()->error('Error fetching terms and conditions', ['error' => $e->getMessage()]);
+            
             return abort(500, 'An error occurred while retrieving terms and conditions');
         }
     }
