@@ -8,8 +8,6 @@ use Illuminate\Support\Str;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-use App\Services\Snowflake;
-
 class Currency extends Model
 {
     use HasFactory;
@@ -18,14 +16,20 @@ class Currency extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['curid', 'name', 'shortcode', 'createdBy', 'lastUpdatedBy', 'status'];
+    protected $fillable = [
+        'curid', 
+        'name', 
+        'shortcode', 
+        'createdBy', 
+        'lastUpdatedBy', 
+        'status'
+    ];
 
     protected static function boot()
     {
         parent::boot();
         static::creating(function ($currency) {
-            $snowflake = new Snowflake(1); // Machine ID = 1
-            $currency->curid = $snowflake->generateId();
+            $currency->curid = generate_snowflake_id();
         });
     }
 
@@ -36,6 +40,6 @@ class Currency extends Model
 
     public function exchanges(): BelongsToMany
     {
-        return $this->belongsToMany(Exchange::class, 'exchange_currency', 'curid', 'exid');
+        return $this->belongsToMany(Exchange::class, 'exchange_currency', 'currency_id', 'exchange_id');
     }
 }
