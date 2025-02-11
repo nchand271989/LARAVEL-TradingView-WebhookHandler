@@ -12,12 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('strategies', function (Blueprint $table) {
-            $table->uuid('stratid')->primary();
+            $table->unsignedBigInteger('stratid')->primary(); // Store Snowflake ID as an integer
+
             $table->string('name');
             $table->text('pineScript');
             $table->boolean('auto_reverse_order')->default(true);
-            $table->uuid('createdBy');
-            $table->uuid('lastUpdatedBy');
+            
+            $table->unsignedBigInteger('createdBy');
+            $table->unsignedBigInteger('lastUpdatedBy');
+            
             $table->timestamps();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
 

@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 
 use App\Notifications\CustomVerifyEmail;
 
+use App\Services\Snowflake;
+
 class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens;
@@ -69,7 +71,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'id' => 'string', // Ensure id is treated as a string
+            'id' => 'integer', // Ensure id is treated as a string
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean', // Ensure is_admin is treated as a boolean
@@ -85,7 +87,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
         static::creating(function ($user) {
             if (empty($user->id)) {
-                $user->id = (string) Str::uuid(); // Generate UUID on creation
+                $snowflake = new Snowflake(1); // Machine ID = 1
+                $user->id = $snowflake->generateId();
             }
             $user->is_admin = false; // Ensure new users are always non-admin
         });

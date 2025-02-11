@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('exchanges', function (Blueprint $table) {
-            $table->uuid('exid')->primary();
+            $table->unsignedBigInteger('exid')->primary(); // Store Snowflake ID as an integer
             $table->string('name', 255)->unique();
-            $table->uuid('createdBy');
-            $table->uuid('lastUpdatedBy');
+            $table->unsignedBigInteger('createdBy');
+            $table->unsignedBigInteger('lastUpdatedBy');
             $table->timestamps();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
 

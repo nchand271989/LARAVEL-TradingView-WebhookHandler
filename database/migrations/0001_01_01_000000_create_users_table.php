@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->unsignedBigInteger('id')->primary(); // Store Snowflake ID as an integer
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
@@ -20,7 +20,13 @@ return new class extends Migration
             $table->rememberToken();
             $table->foreignId('current_team_id')->nullable();
             $table->string('profile_photo_path', 2048)->nullable();
+            $table->boolean('is_admin')->default(false);
+            $table->unsignedBigInteger('tid')->nullable();
+            $table->unsignedBigInteger('pid')->nullable();
             $table->timestamps();
+
+            $table->foreign('tid')->references('tid')->on('terms_and_conditions')->onDelete('set null');
+            $table->foreign('pid')->references('pid')->on('privacy_policies')->onDelete('set null'); 
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

@@ -56,7 +56,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Exchanges
     Route::resource('/markets-assets/exchanges', ExchangeController::class)->except(['destroy']);
-    Route::patch('/markets-assets/exchanges/{exchange}/toggle-status', [ExchangeController::class, 'toggleStatus'])
+    Route::patch('/markets-assets/exchanges/{exid}/toggle-status', [ExchangeController::class, 'toggleStatus'])
     ->name('exchanges.toggleStatus');
 
 

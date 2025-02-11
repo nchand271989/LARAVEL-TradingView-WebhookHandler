@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('strategy_attributes', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('stratid');
+            $table->unsignedBigInteger('stratid'); // Store Snowflake ID as an integer
             $table->string('attribute_name');
             $table->string('attribute_value');
             $table->timestamps();

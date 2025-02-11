@@ -6,6 +6,8 @@ use MongoDB\Client;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\LogRecord;
 
+use Illuminate\Support\Facades\Auth;
+
 class MongoDBLogger extends AbstractProcessingHandler
 {
     protected $collection;
@@ -27,9 +29,10 @@ class MongoDBLogger extends AbstractProcessingHandler
     protected function write(LogRecord $record): void
     {
         $this->collection->insertOne([
+            'user_id' => (string) Auth::id(),
+            'message' => $record->message,
             'channel' => $record->channel,
             'level' => $record->level->name,
-            'message' => $record->message,
             'context' => (array) $record->context,  // Convert object to array
             'extra' => (array) $record->extra,      // Convert object to array
             'datetime' => $record->datetime->format('Y-m-d H:i:s'),

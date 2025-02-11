@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('exchange_currency', function (Blueprint $table) {
-            $table->uuid('exid');
-            $table->uuid('curid');
+            $table->unsignedBigInteger('exid');
+            $table->unsignedBigInteger('curid');
             $table->foreign('exid')->references('exid')->on('exchanges')->onDelete('cascade');
             $table->foreign('curid')->references('curid')->on('currencies')->onDelete('cascade');
             $table->primary(['exid', 'curid']);

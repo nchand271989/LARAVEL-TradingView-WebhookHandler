@@ -131,7 +131,6 @@ return [
         'mongodb' => [
             'driver' => 'monolog',
             'handler' => App\Logging\MongoDBLogger::class,
-            'level' => 'debug',
         ],
 
     ],

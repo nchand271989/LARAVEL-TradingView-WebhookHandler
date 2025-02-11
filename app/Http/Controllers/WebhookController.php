@@ -11,43 +11,41 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
+use App\Services\Snowflake;
+
 class WebhookController extends Controller
 {
     public function index(Request $request)
     {
         try {
-            Log::info('Fetching webhooks', [
-                'user_id' => Auth::id(),
-                'search' => $request->get('search'),
-                'sortBy' => $request->get('sortBy', 'created_at'),
-                'sortOrder' => $request->get('sortOrder', 'desc'),
-            ]);
-
             $query = Webhook::with('strategy')->orderBy($request->get('sortBy', 'created_at'), $request->get('sortOrder', 'desc'));
 
             if ($search = $request->get('search')) {
                 $query->where('name', 'LIKE', "%$search%");
+                Log::info('Applying search filter - '. $request->search);
             }
 
             $webhooks = $query->paginate(10);
-            Log::info('Webhooks fetched successfully', ['user_id' => Auth::id(), 'count' => $webhooks->count()]);
-
-            return view('webhooks.index', compact('webhooks'));
+            Log::info('Total found webhooks - '. $webhooks->count(). ' ['.$webhooks->pluck('name')->implode(', ').']');
         } catch (\Exception $e) {
             Log::error('Error fetching webhooks', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
             return back()->with('error', 'Error fetching webhooks');
+        } finally {
+            DB::disconnect();
         }
+        return view('webhooks.index', compact('webhooks'));
     }
 
     public function create()
     {
         try {
-            Log::info('Fetching strategies for webhook creation', ['user_id' => Auth::id()]);
             $strategies = Strategy::with('attributes')->get();
             return view('webhooks.create', compact('strategies'));
         } catch (\Exception $e) {
             Log::error('Error fetching strategies', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
             return back()->with('error', 'Error loading strategies');
+        }finally {
+            DB::disconnect();
         }
     }
 
@@ -60,14 +58,16 @@ class WebhookController extends Controller
             $strategies = Strategy::with('attributes')->get();
             return view('webhooks.create', compact('webhook', 'strategies'));
         } catch (\Exception $e) {
-            Log::error('Error loading webhook for editing', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid, 'error' => $e->getMessage()]);
             return back()->with('error', 'Error loading webhook');
+        }finally {
+            DB::disconnect();
         }
     }
 
     public function store(Request $request)
     {
         try {
+
             Log::info('Creating new webhook', ['user_id' => Auth::id(), 'name' => $request->name, 'stratid' => $request->stratid]);
 
             $request->validate([
@@ -78,8 +78,9 @@ class WebhookController extends Controller
 
             DB::beginTransaction();
 
+            $snowflake = new Snowflake(1); // Machine ID = 1
+
             $webhook = Webhook::create([
-                'webhid' => Str::uuid(),
                 'name' => $request->name,
                 'stratid' => $request->stratid,
                 'createdBy' => Auth::id(),
@@ -87,10 +88,10 @@ class WebhookController extends Controller
                 'lastUpdatedBy' => Auth::id(),
             ]);
 
-            Log::info('Webhook created successfully', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid]);
-
             if ($request->has('attributes')) {
+                Log::info('test');
                 foreach ($request->input('attributes', []) as $attribute) {
+                    Log::info('Attribute', ['user_id' => Auth::id(), $attribute]);
                     WebhookAttribute::create([
                         'webhid' => $webhook->webhid,
                         'attribute_name' => $attribute['name'],
@@ -101,7 +102,6 @@ class WebhookController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('webhooks.index')->with('success', 'Webhook created successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error creating webhook', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
@@ -109,8 +109,8 @@ class WebhookController extends Controller
         }
         finally {
             DB::disconnect();
-            Log::info('Database connection closed', ['user_id' => Auth::id()]);
         }
+        return redirect()->route('webhooks.index')->with('success', 'Webhook created successfully!');
     }
 
     public function toggleStatus(Webhook $webhook)
@@ -118,25 +118,17 @@ class WebhookController extends Controller
         try {
             $newStatus = $webhook->status === 'Active' ? 'Inactive' : 'Active';
 
-            Log::info('Toggling webhook status', [
-                'user_id' => Auth::id(),
-                'webhid' => $webhook->webhid,
-                'previous_status' => $webhook->status,
-                'new_status' => $newStatus,
-            ]);
-
             $webhook->update(['status' => $newStatus]);
 
             Log::info('Webhook status updated successfully', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid, 'new_status' => $newStatus]);
-            return redirect()->route('webhooks.index')->with('success', 'Webhook status updated successfully!');
         } catch (\Exception $e) {
             Log::error('Error toggling webhook status', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid, 'error' => $e->getMessage()]);
             return back()->with('error', 'Error toggling webhook status');
         }
         finally {
             DB::disconnect();
-            Log::info('Database connection closed', ['user_id' => Auth::id()]);
         }
+        return redirect()->route('webhooks.index')->with('success', 'Webhook status updated successfully!');
     }
 
     public function destroy(Webhook $webhook)
@@ -152,7 +144,6 @@ class WebhookController extends Controller
         }
         finally {
             DB::disconnect();
-            Log::info('Database connection closed', ['user_id' => Auth::id()]);
         }
     }
 
@@ -177,8 +168,6 @@ class WebhookController extends Controller
                 'lastUpdatedBy' => auth()->id(),
             ]);
 
-            Log::info('Webhook updated successfully', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid]);
-
             // Delete old attributes
             WebhookAttribute::where('webhid', $webhook->webhid)->delete();
 
@@ -191,11 +180,9 @@ class WebhookController extends Controller
                         'attribute_value' => $attribute['value'],
                     ]);
                 }
-                Log::info('Webhook attributes updated successfully', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid]);
             }
 
             DB::commit();
-            return redirect()->route('webhooks.index')->with('success', 'Webhook updated successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error updating webhook', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid, 'error' => $e->getMessage()]);
@@ -203,7 +190,7 @@ class WebhookController extends Controller
         }
         finally {
             DB::disconnect();
-            Log::info('Database connection closed', ['user_id' => Auth::id()]);
         }
+        return redirect()->route('webhooks.index')->with('success', 'Webhook updated successfully!');
     }
 }

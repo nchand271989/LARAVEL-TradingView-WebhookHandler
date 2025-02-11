@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('webhook_attributes', function (Blueprint $table) {
-            $table->id();
-            $table->uuid('webhid');
+            $table->unsignedBigInteger('webhid'); // Store Snowflake ID as an integer
             $table->string('attribute_name');
             $table->string('attribute_value');
             $table->timestamps();

@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+use App\Services\Snowflake;
+
 class Currency extends Model
 {
     use HasFactory;
@@ -22,7 +24,8 @@ class Currency extends Model
     {
         parent::boot();
         static::creating(function ($currency) {
-            $currency->curid = (string) Str::uuid();
+            $snowflake = new Snowflake(1); // Machine ID = 1
+            $currency->curid = $snowflake->generateId();
         });
     }
 

@@ -14,29 +14,28 @@ class CurrencyController extends Controller
     {
         $user = Auth::user();
         try {
-            Log::info('Fetching currencies list', ['user' => $user->id, 'search' => $request->search]);
-
+        
             $query = Currency::query();
 
             if ($request->has('search')) {
-                Log::info('Applying search filter', ['user' => $user->id, 'search' => $request->search]);
+                Log::info('Applying search filter - '. $request->search);
                 $query->where('name', 'like', "%{$request->search}%")
                       ->orWhere('shortcode', 'like', "%{$request->search}%");
             }
 
             if ($request->has('sortBy') && in_array($request->sortBy, ['name', 'shortcode', 'status', 'created_at'])) {
-                Log::info('Applying sorting', ['user' => $user->id, 'sortBy' => $request->sortBy, 'sortOrder' => $request->sortOrder]);
                 $query->orderBy($request->sortBy, $request->sortOrder == 'desc' ? 'desc' : 'asc');
             } else {
-                Log::info('Applying default sorting by created_at desc', ['user' => $user->id]);
                 $query->orderBy('created_at', 'desc');
             }
 
             $currencies = $query->paginate(10);
-            Log::info('Currencies fetched successfully', ['user' => $user->id, 'count' => $currencies->count()]);
+            Log::info('Total found currencies - '. $currencies->count(). ' ['.$currencies->pluck('name')->implode(', ').']');
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch currencies - '.$e->getMessage(), ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
+            return back()->with('error', 'Failed to fetch exchanges.');
         } finally {
             DB::disconnect('mysql');
-            Log::info('Database connection closed after fetching currencies', ['user' => $user->id]);
         }
 
         return view('currencies.index', compact('currencies'));
@@ -45,7 +44,6 @@ class CurrencyController extends Controller
     public function create()
     {
         $user = Auth::user();
-        Log::info('Navigating to currency creation page', ['user' => $user->id]);
         return view('currencies.create');
     }
 
@@ -59,7 +57,7 @@ class CurrencyController extends Controller
         ]);
 
         try {
-            Log::info('Creating a new currency', ['user' => $user->id, 'name' => $request->name, 'shortcode' => $request->shortcode]);
+            Log::info('Creating a new currency '.$request->name.' ('.$request->shortcode.')', ['name' => $request->name, 'shortcode' => $request->shortcode]);
             $currency = Currency::create([
                 'name' => $request->name,
                 'shortcode' => $request->shortcode,
@@ -67,10 +65,9 @@ class CurrencyController extends Controller
                 'createdBy' => $user->id,
                 'lastUpdatedBy' => $user->id,
             ]);
-            Log::info('Currency created successfully', ['user' => $user->id, 'currency_id' => $currency->id]);
+            Log::info('Currency name '.$request->name.' created successfully with currencyId '.$currency->id, ['currency_id' => $currency->id, 'name' => $request->name]);
         } finally {
             DB::disconnect('mysql');
-            Log::info('Database connection closed after currency creation', ['user' => $user->id]);
         }
 
         return redirect()->route('currencies.index')->with('success', 'Currency created successfully.');
@@ -80,20 +77,18 @@ class CurrencyController extends Controller
     {
         $user = Auth::user();
         try {
-            Log::info('Fetching currency for status toggle', ['user' => $user->id, 'currency_id' => $curid]);
             $currency = Currency::findOrFail($curid);
 
             $currency->status = ($currency->status === 'Active') ? 'Inactive' : 'Active';
             $currency->save();
-            Log::info('Currency status toggled', ['user' => $user->id, 'currency_id' => $curid, 'new_status' => $currency->status]);
+            Log::info('Currency status for currencyId '.$curid.', '.$currency->name.' toggled to '.$currency->status, ['currency_id' => $currency->id, 'status' => $currency->status]);
 
             if ($currency->status === 'Inactive') {
                 $currency->exchanges()->detach();
-                Log::info('Removed currency from all exchanges', ['user' => $user->id, 'currency_id' => $curid]);
+                Log::info('Currency status for currencyId '.$curid.', '.$currency->name.' toggled to Inactive, resulting to deatach currency from all exchanges');
             }
         } finally {
             DB::disconnect('mysql');
-            Log::info('Database connection closed after toggling status', ['user' => $user->id]);
         }
 
         return redirect()->route('currencies.index')->with('success', 'Currency status updated.');
@@ -103,13 +98,11 @@ class CurrencyController extends Controller
     {
         $user = Auth::user();
         try {
-            Log::info('Deleting currency', ['user' => $user->id, 'currency_id' => $curid]);
             $currency = Currency::findOrFail($curid);
             $currency->delete();
-            Log::info('Currency deleted successfully', ['user' => $user->id, 'currency_id' => $curid]);
+            Log::info('Deleting currency for curid - '.$curid, ['currency_id' => $curid]);
         } finally {
             DB::disconnect('mysql');
-            Log::info('Database connection closed after deletion', ['user' => $user->id]);
         }
 
         return redirect()->route('currencies.index')->with('success', 'Currency deleted successfully.');

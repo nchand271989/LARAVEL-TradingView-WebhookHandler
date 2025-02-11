@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('currencies', function (Blueprint $table) {
-            $table->uuid('curid')->primary(); // 36-character unique identifier
+            $table->unsignedBigInteger('curid')->primary(); // Store Snowflake ID as an integer
             $table->string('name', 100); // Limited to 100 characters
             $table->string('shortcode', 10)->unique(); // Limited to 10 characters, unique constraint
-            $table->uuid('createdBy');
-            $table->uuid('lastUpdatedBy');
+            $table->unsignedBigInteger('createdBy');
+            $table->unsignedBigInteger('lastUpdatedBy');
             $table->timestamps(); // Automatically creates created_at & updated_at
             $table->enum('status', ['Active', 'Inactive'])->default('Active'); // Only allowed values
 

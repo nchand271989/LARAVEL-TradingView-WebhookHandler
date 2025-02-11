@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+use App\Services\Snowflake;
+
 class Strategy extends Model
 {
     use HasFactory;
@@ -20,7 +22,8 @@ class Strategy extends Model
     {
         parent::boot();
         static::creating(function ($strategy) {
-            $strategy->stratid = (string) Str::uuid();
+            $snowflake = new Snowflake(1); // Machine ID = 1
+            $strategy->stratid = $snowflake->generateId();
         });
     }
 

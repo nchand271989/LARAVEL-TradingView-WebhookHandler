@@ -12,12 +12,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('webhooks', function (Blueprint $table) {
-            $table->uuid('webhid')->primary();
+            $table->unsignedBigInteger('webhid')->primary(); // Store Snowflake ID as an integer
+
             $table->string('name');
-            $table->uuid('stratid');
+
+            $table->unsignedBigInteger('stratid');
+            
             $table->foreign('stratid')->references('stratid')->on('strategies')->onDelete('cascade');
-            $table->uuid('createdBy');
-            $table->uuid('lastUpdatedBy');
+            
+            $table->unsignedBigInteger('createdBy');
+            $table->unsignedBigInteger('lastUpdatedBy');
+            
             $table->timestamps();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
 
