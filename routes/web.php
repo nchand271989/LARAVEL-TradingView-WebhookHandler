@@ -53,7 +53,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Currencies
     Route::resource('/markets-assets/currencies', CurrencyController::class)->except(['destroy']);
-    Route::patch('/markets-assets/currencies/{curid}/toggle-status', [CurrencyController::class, 'toggleStatus'])
+    Route::patch('/markets-assets/currencies/{currency}/toggle-status', [CurrencyController::class, 'toggleStatus'])
     ->name('currencies.toggleStatus');
 
     // Exchanges

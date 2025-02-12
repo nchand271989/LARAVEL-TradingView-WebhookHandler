@@ -12,32 +12,7 @@ class CurrencyController extends Controller
     /** Display a listing of the currencies.*/
     public function index(Request $request)
     {
-        try {
-            $query = Currency::query();
-
-            /** Apply search filters if present */ 
-            if ($request->has('search')) {
-                $query->where('name', 'like', "%{$request->search}%")
-                      ->orWhere('shortcode', 'like', "%{$request->search}%");
-            }
-
-            /** Apply sorting if valid parameters are provided */ 
-            if ($request->has('sortBy') && in_array($request->sortBy, ['name', 'shortcode', 'status', 'created_at'])) {
-                $query->orderBy($request->sortBy, $request->sortOrder === 'desc' ? 'desc' : 'asc');
-            } else {
-                $query->orderBy('created_at', 'desc');
-            }
-
-            $currencies = $query->paginate(10);                                                     // Paginate results
-        } catch (\Exception $e) {
-
-            /** Logging */
-            logger()->error('Failed to fetch currencies', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
-
-            return back()->with('error', 'An error occurred while fetching currencies.');
-        }
-
-        return view('currencies.index', compact('currencies'));
+        return fetchFilteredRecords(Currency::class, $request, ['name', 'shortcode', 'status', 'created_at'], 'currencies.index');
     }
 
     /** Show the form for creating a new currency. */
@@ -75,12 +50,10 @@ class CurrencyController extends Controller
     }
 
     /** Toggle the status of a currency. */
-    public function toggleStatus($curid)
+    public function toggleStatus(Currency $currency)
     {
         try {
             DB::beginTransaction();                                                                 // Start Transaction
-
-            $currency = Currency::findOrFail($curid);
 
             // Toggle status
             $currency->status = ($currency->status === 'Active') ? 'Inactive' : 'Active';

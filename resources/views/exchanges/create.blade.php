@@ -16,7 +16,7 @@
             </x-breadcrumb>
 
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                <form method="POST" action="{{ isset($exchange) ? route('exchanges.update', $exchange->exid) : route('exchanges.store') }}" id="exchange-form">
+                <form method="POST" action="{{ isset($exchange) ? route('exchanges.update', $exchange) : route('exchanges.store') }}" id="exchange-form">
                     @csrf
                     @if(isset($exchange))
                         @method('PATCH')

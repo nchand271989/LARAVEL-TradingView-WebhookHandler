@@ -29,11 +29,12 @@
                         'shortcode' => 'Code',
                         'status' => 'Status',
                     ]"
-                    :items="$currencies"
-                    statusToggleRoute="currencies.toggleStatus" />
+                    :items="$records"
+                    statusToggleRoute="currencies.toggleStatus"
+                    :detachRelations="['exchanges']" />
 
                 <div class="mt-4">
-                    {{ $currencies->links() }}
+                    {{ $records->links() }}
                 </div>
             </div>
         </div>
