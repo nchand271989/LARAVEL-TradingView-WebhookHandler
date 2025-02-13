@@ -30,7 +30,7 @@
                     ]"
                     :actions="['Edit']"
                     :items="$records"
-                    statusToggleRoute="exchanges.toggleStatus"
+                    :detachRelations="['wallets']"
                     editRoute="exchanges.edit"
                     deleteRoute="exchanges.destroy" />
 

@@ -13,20 +13,14 @@ return new class extends Migration
     {
         Schema::create('webhooks', function (Blueprint $table) {
             $table->unsignedBigInteger('webhid')->primary(); // Store Snowflake ID as an integer
-
             $table->string('name');
-
-            $table->unsignedBigInteger('stratid');
-            
-            $table->foreign('stratid')->references('stratid')->on('strategies')->onDelete('cascade');
-            
+            $table->unsignedBigInteger('strategy_id');
             $table->unsignedBigInteger('createdBy');
             $table->unsignedBigInteger('lastUpdatedBy');
-            
             $table->timestamps();
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
 
-            // Add foreign key constraint AFTER column definition
+            $table->foreign('strategy_id')->references('stratid')->on('strategies');
             $table->foreign('createdBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
             $table->foreign('lastUpdatedBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
         });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Exchange;
 use App\Models\ExchangeWallet;
 use App\Models\Ledger;
 use Illuminate\Http\Request;
@@ -13,94 +14,87 @@ use App\Services\Snowflake;
 
 class WalletController extends Controller
 {
-    public function index()
+    /** Display a listing of the wallets.*/
+    public function index(Request $request)
     {
-        $wallets = \App\Models\ExchangeWallet::select('exchange_wallets.*')
-            ->with(['exchange:exid,name']) // Load Exchange Name
-            ->withSum('ledger as balance', 'amount') // Calculate Balance
-            ->paginate(10);
+        $relations = ['exchange:exid,name'];                                                                                  /** Eager load exchange relation */ 
+        $withSum = ['ledger as balance' => 'amount'];                                                                         /** Sum the `amount` column from `ledger` relation */ 
 
-        return view('wallets.index', compact('wallets'));
+        return fetchFilteredRecords(ExchangeWallet::class, 
+            $request, 
+            ['wltid', 'status'], 
+            'wallets.index', 
+            $relations, 
+            $withSum
+        );
     }
 
-
+    /** Show the form for creating a new wallet. */
     public function create()
     {
-        $exchanges = \App\Models\Exchange::where('status', 'Active')->get();
+        $exchanges = Exchange::where('status', 'Active')->get();
         return view('wallets.create', compact('exchanges'));
     }
 
 
     public function store(Request $request)
     {
-        \Log::info('Request data:', $request->all()); // Debugging line
+        $requestID = generate_snowflake_id();
+        
+        logger()->info($requestID.'-> Requested to create new waller', ['request' => $request]);                              /** Logging -> wallet creation request*/
 
         $request->validate([
             'exid' => 'required|integer',
         ]);
 
         try {
-            $snowflake = new Snowflake(1); // Machine ID = 1
-            $wltid = $snowflake->generateId();
 
             $wallet = \App\Models\ExchangeWallet::create([
-                'wltid' => $wltid,
-                'exid' => $request->exid,
+                'exchange_id' => $request->exid,
                 'status' => 'Active',
             ]);
 
-            return redirect()->route('wallets.index')->with('success', 'Wallet created successfully.');
+            logger()->info($requestID.'-> New wallet Created', ['request' => $request]);                                      /** Logging -> wallet created. */
+
         } catch (\Exception $e) {
-            \Log::error('Error creating wallet: ' . $e->getMessage());
+
+            logger()->error($requestID.'-> Error creating wallet: ' . $e->getMessage());
+
             return back()->withErrors('Error creating wallet.');
         }
-    }
 
-    public function toggleStatus($wltid)
-    {
-        $userId = Auth::id();
-
-        try {
-            // Find the wallet using the wltid
-            $wallet = ExchangeWallet::where('wltid', $wltid)->firstOrFail();
-
-            // Check the status of the associated exchange
-            if ($wallet->exchange->status === 'Inactive' && $wallet->status === 'Inactive') {
-                return back()->with('error', 'Cannot activate wallet because the associated exchange is inactive.');
-            }
-
-            // Toggle status
-            $wallet->update(['status' => $wallet->status === 'Active' ? 'Inactive' : 'Active']);
-
-            Log::info('Wallet status toggled', ['wallet_id' => $wallet->wltid, 'status' => $wallet->status]);
-
-            return redirect()->route('wallets.index')->with('success', 'Wallet status updated.');
-        } catch (\Exception $e) {
-            Log::error('Error toggling wallet status', ['user_id' => $userId, 'error' => $e->getMessage()]);
-            return back()->with('error', 'Failed to update wallet status.');
-        }
+        return redirect()->route('wallets.index')->with('success', 'Wallet created successfully.');
     }
 
 
     public function topUp(Request $request, $wltid)
     {
+        $requestID = generate_snowflake_id();
+
+        logger()->info($requestID.'-> Requested to top up wallet', ['wallet' => $wltid, 'request' => $request]);              /** Logging -> wallet top up request*/
+
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
         ]);
 
         try {
             Ledger::create([
-                'wltid' => $wltid,
+                'wallet_id' => $wltid,
                 'amount' => $request->amount,
                 'transaction_type' => 'Credit',
                 'description' => 'Wallet top-up',
             ]);
 
-            return redirect()->route('wallets.index')->with('success', 'Wallet topped up successfully.');
+            logger()->info($requestID.'-> Top up successfull on wallet.', ['wallet' => $wltid, 'request' => $request]);       /** Logging -> wallet top up request*/
+
         } catch (\Exception $e) {
-            Log::error('Error topping up wallet: ' . $e->getMessage());
+            
+            logger()->error($requestID.'-> Error topping up wallet: ' . $e->getMessage());
+            
             return back()->withErrors('Error topping up wallet.');
         }
+
+        return redirect()->route('wallets.index')->with('success', 'Wallet topped up successfully.');
     }
 }
 

@@ -10,10 +10,10 @@ class Ledger extends Model
     use HasFactory;
 
     protected $table = 'ledger';
-    protected $fillable = ['wltid', 'amount', 'transaction_type', 'description', 'transaction_time'];
+    protected $fillable = ['wallet_id', 'amount', 'transaction_type', 'description', 'transaction_time'];
 
     public function wallet()
     {
-        return $this->belongsTo(ExchangeWallet::class, 'wltid', 'wltid');
+        return $this->belongsTo(ExchangeWallet::class, 'wallet_id', 'wltid');
     }
 }

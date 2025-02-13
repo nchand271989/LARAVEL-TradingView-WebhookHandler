@@ -85,7 +85,9 @@ class ExchangeController extends Controller
 
     public function update(Request $request, Exchange $exchange)
     {
-        logger()->info('Requst for updating exchange', ['request' => $request->all()]);
+        $requestID = generate_snowflake_id();      
+
+        logger()->info($requestID.'-> Requst for updating exchange', ['request' => $request->all()]);
 
         try {
 
@@ -110,7 +112,7 @@ class ExchangeController extends Controller
 
             DB::commit();
 
-            logger()->info('Exchange updated successfully');
+            logger()->info($requestID.'-> Exchange updated successfully');
 
             return redirect()->route('exchanges.index')->with('success', 'Exchange updated successfully.');
 
@@ -118,33 +120,9 @@ class ExchangeController extends Controller
             
             DB::rollBack();
             
-            logger()->error('Failed to update exchange with exchangeId-'.$exchange->exid, ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
+            logger()->error($requestID.'-> Failed to update exchange with exchangeId-'.$exchange->exid, ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
             
             return back()->with('error', 'Failed to update exchange: ' . $e->getMessage());
         }
-    }
-
-    public function toggleStatus(Exchange $exchange)
-    {
-        logger()->info('Request to update exchange from '.$exchange->status);
-        try {
-            
-            $exchange->status = ($exchange->status === 'Active') ? 'Inactive' : 'Active';
-            $exchange->save();
-
-            if ($exchange->status === 'Inactive') {
-                ExchangeWallet::where('exid', $exid)->update(['status' => 'Inactive']);
-            }
-
-            logger()->info('Exchange status updated to '.$exchange->status);
-            
-        } catch (\Exception $e) {
-
-            logger()->error('Failed to update exchange status', ['error' => $e->getMessage()]);
-
-            return back()->with('error', 'Failed to update status.');
-        } 
-
-        return redirect()->route('exchanges.index')->with('success', 'Exchange status updated.');
     }
 }

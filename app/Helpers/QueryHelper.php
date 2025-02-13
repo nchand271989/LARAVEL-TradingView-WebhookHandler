@@ -14,11 +14,15 @@ use Illuminate\Http\Request;
  * @param array $relations Optional relationships to eager load.
  * @return \Illuminate\Contracts\View\View|\Illuminate\Http\RedirectResponse
  */
-function fetchFilteredRecords($model, Request $request, array $filterableColumns, string $view, array $relations = [])
+function fetchFilteredRecords($model, Request $request, array $filterableColumns, string $view, array $relations = [], array $withSum = [])
 {
     try {
-        
-        $query = !empty($relations) ? $model::with($relations) : $model::query();               /** Initialize query with optional eager loading */ 
+
+         $query = $model::query()
+            ->when(!empty($relations), fn($q) => $q->with($relations))
+            ->when(!empty($withSum), fn($q) => $q->tap(fn($q) => collect($withSum)->each(fn($col, $rel) => $q->withSum($rel, $col))));
+
+        // $query = !empty($relations) ? $model::with($relations) : $model::query();               /** Initialize query with optional eager loading */ 
 
         $query = applyFilters($query, $request, $filterableColumns);                            /** Apply search and sorting filters */ 
 

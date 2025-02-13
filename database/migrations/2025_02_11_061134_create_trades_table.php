@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('trades', function (Blueprint $table) {
             $table->unsignedBigInteger('id')->primary();
-            $table->unsignedBigInteger('webhid');
-            $table->unsignedBigInteger('stratid');
-            $table->unsignedBigInteger('wltid');
+            $table->unsignedBigInteger('webhook_id');
+            $table->unsignedBigInteger('strategy_id');
+            $table->unsignedBigInteger('wallet_id');
             $table->decimal('quantity', 16, 3);
             $table->enum('timeframe', ['1m', '3m', '5m', '10m', '15m', '30m', 'H', 'D', 'M']);
             $table->decimal('openingPrice', 16, 8);
@@ -25,6 +25,10 @@ return new class extends Migration
             $table->text('comments')->nullable();
             $table->enum('status', ['Active', 'Closed'])->default('Active');
             $table->timestamps();
+
+            $table->foreign('webhook_id')->references('webhid')->on('webhooks');
+            $table->foreign('strategy_id')->references('stratid')->on('strategies');
+            $table->foreign('wallet_id')->references('wltid')->on('exchange_wallets');
         });
     }
 

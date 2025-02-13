@@ -37,10 +37,20 @@ class StatusToggle extends Component
             if ($this->model->status === 'Inactive' && !empty($this->detachRelations)) {
                 foreach ($this->detachRelations as $relation) {
                     if (method_exists($this->model, $relation)) {
-                        $this->model->$relation()->detach();
+                        $relationInstance = $this->model->$relation();
+            
+                        // Check if the relation is many-to-many (BelongsToMany)
+                        if ($relationInstance instanceof \Illuminate\Database\Eloquent\Relations\BelongsToMany) {
+                            $relationInstance->detach(); // Detach for many-to-many relations
+                        }
+                        // Check if the relation is one-to-many (HasMany)
+                        elseif ($relationInstance instanceof \Illuminate\Database\Eloquent\Relations\HasMany) {
+                            $relationInstance->delete(); // Delete for one-to-many relations
+                        }
                     }
                 }
             }
+            
 
             DB::commit();
 

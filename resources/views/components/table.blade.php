@@ -1,11 +1,12 @@
 @props([
     'columns' => [], 
     'items' => [], 
-    'statusToggleRoute' => null, // Dynamic route for status toggle
     'actions' => [],
     'detachRelations' => [], // New prop for detachRelations
     'editRoute' => null,
-    'deleteRoute' => null
+    'deleteRoute' => null,
+    'topUpRoute' => null,
+    'topUpWalletKey' => null,
 ])
 
 @php
@@ -51,7 +52,7 @@
                         $alignment = $loop->last ? 'text-right' : 'text-left';
                     @endphp
                     <td class="py-3 px-6 {{ $alignment }} @if($index === 'currencies') hidden sm:table-cell @endif">
-                        @if ($index === 'status' && $statusToggleRoute)
+                        @if ($index === 'status')
                             @livewire('status-toggle', [
                                 'model' => $item,
                                 'actions' => $actions,
@@ -65,9 +66,20 @@
                                     <x-currency>{{ $currency->shortcode }}</x-currency>
                                 @endforeach
                             </div>
+                        @elseif (session('is_admin') && $index === 'topup')
+                            <form method="POST" action="{{ route($topUpRoute, $item->$topUpWalletKey) }}" class="inline">
+                                @csrf
+                                <input type="number" name="amount" step="0.01" required placeholder="Amount" class="border p-1 rounded w-24">
+                                <button type="submit" class="bg-blue-500 text-white px-2 py-1 rounded">Top Up</button>
+                            </form>     
                         @else
-                            <!-- Other columns -->
-                            {{ $item->$index ?? '' }}
+                            @php
+                            $value = $item;
+                            foreach(explode('->', $index) as $segment) {
+                                $value = $value->$segment ?? null;
+                            }
+                            @endphp
+                            {{ $value ?? '' }}
                         @endif
                     </td>
                 @endforeach

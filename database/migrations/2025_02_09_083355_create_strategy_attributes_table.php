@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('strategy_attributes', function (Blueprint $table) {
-            $table->unsignedBigInteger('stratid'); // Store Snowflake ID as an integer
+            $table->unsignedBigInteger('strategy_id'); // Store Snowflake ID as an integer
             $table->string('attribute_name');
             $table->string('attribute_value');
             $table->timestamps();
 
-            $table->foreign('stratid')->references('stratid')->on('strategies')->onDelete('cascade');
+            $table->foreign('strategy_id')->references('stratid')->on('strategies')->onDelete('cascade');
         });
     }
 

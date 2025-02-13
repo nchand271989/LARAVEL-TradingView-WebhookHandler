@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('ledger', function (Blueprint $table) {
             $table->id(); // Auto-incrementing ID
-            $table->unsignedBigInteger('wltid');
+            $table->unsignedBigInteger('wallet_id');
             $table->decimal('amount', 16, 8);
             $table->enum('transaction_type', ['Credit', 'Debit']);
             $table->text('description')->nullable();
             $table->timestamp('transaction_time')->useCurrent();
             $table->timestamps();
 
-            $table->foreign('wltid')->references('wltid')->on('exchange_wallets')->onDelete('cascade');
+            $table->foreign('wallet_id')->references('wltid')->on('exchange_wallets')->onDelete('cascade'); 
         });
     }
 

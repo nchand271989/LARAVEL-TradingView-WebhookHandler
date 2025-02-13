@@ -6,25 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    /** Run the migrations. */
     public function up(): void
     {
         Schema::create('exchange_wallets', function (Blueprint $table) {
             $table->unsignedBigInteger('wltid')->primary();
-            $table->unsignedBigInteger('exid');
-            $table->bigInteger('scnid')->nullable()->unique(); // Allow only one wallet per scenario
+            $table->unsignedBigInteger('exchange_id');
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
 
-            $table->foreign('scnid')->references('scnid')->on('scenarios')->onDelete('set null');
+            $table->foreign('exchange_id')->references('exid')->on('exchanges');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    /** Reverse the migrations. */
     public function down(): void
     {
         Schema::dropIfExists('exchange_wallets');
