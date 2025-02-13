@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-use App\Services\Snowflake;
-
 class Webhook extends Model
 {
     use HasFactory;
@@ -16,25 +14,24 @@ class Webhook extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['webhid', 'name', 'stratid', 'createdBy', 'lastUpdatedBy', 'status'];
+    protected $fillable = ['webhid', 'name', 'strategy_id', 'createdBy', 'lastUpdatedBy', 'status'];
 
     protected static function boot()
     {
         parent::boot();
         static::creating(function ($webhook) {
-            $snowflake = new Snowflake(1); // Machine ID = 1
-            $webhook->webhid = $snowflake->generateId();
+            $webhook->webhid = generate_snowflake_id();
         });
     }
 
     public function strategy()
     {
-        return $this->belongsTo(Strategy::class, 'stratid', 'stratid');
+        return $this->belongsTo(Strategy::class, 'strategy_id', 'stratid');
     }
 
     public function attributes()
     {
-        return $this->hasMany(WebhookAttribute::class, 'webhid', 'webhid');
+        return $this->hasMany(WebhookAttribute::class, 'webhook_id', 'webhid');
     }
 
     public function user()

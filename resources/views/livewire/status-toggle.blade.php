@@ -2,10 +2,10 @@
     @if (session('is_admin') && $model->status=='Inactive')
         @foreach ($actions as $action)
             @if ($action === 'Edit')
-                <a href="{{ route($editRoute, $model) }}" class="text-blue-500 hover:underline">Edit</a>
+                <a href="{{ route($editRoute, $model) }}" class="hidden sm:inline-block text-blue-500 hover:underline">Edit</a>
             @endif
             @if ($action === 'Delete')
-                <form action="{{ route($deleteRoute, $model) }}" method="POST" class="inline-block">
+                <form action="{{ route($deleteRoute, $model) }}" method="POST" class="hidden sm:inline-block">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="text-red-500 hover:underline">Delete</button>

@@ -31,7 +31,7 @@
                             @foreach ($strategies as $strategy)
                                 <option value="{{ $strategy->stratid }}" 
                                     data-attributes='@json($strategy->attributes)'
-                                    {{ isset($webhook) && $webhook->stratid == $strategy->stratid ? 'selected' : '' }}>
+                                    {{ isset($webhook) && $webhook->strategy_id == $strategy->stratid ? 'selected' : '' }}>
                                     {{ $strategy->name }}
                                 </option>
                             @endforeach

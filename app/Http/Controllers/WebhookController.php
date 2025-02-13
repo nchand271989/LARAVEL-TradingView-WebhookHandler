@@ -18,15 +18,8 @@ class WebhookController extends Controller
     public function index(Request $request)
     {
         try {
-            $query = Webhook::with('strategy')->orderBy($request->get('sortBy', 'created_at'), $request->get('sortOrder', 'desc'));
+            return fetchFilteredRecords(Webhook::class, $request, ['name', 'status', 'created_at'], 'webhooks.index', ['strategy']);    
 
-            if ($search = $request->get('search')) {
-                $query->where('name', 'LIKE', "%$search%");
-                Log::info('Applying search filter - '. $request->search);
-            }
-
-            $webhooks = $query->paginate(10);
-            Log::info('Total found webhooks - '. $webhooks->count(). ' ['.$webhooks->pluck('name')->implode(', ').']');
         } catch (\Exception $e) {
             Log::error('Error fetching webhooks', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
             return back()->with('error', 'Error fetching webhooks');
@@ -52,11 +45,11 @@ class WebhookController extends Controller
     public function edit(Webhook $webhook)
     {
         try {
-            Log::info('Editing webhook', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid]);
-
+            
             $webhook->load('attributes');
             $strategies = Strategy::with('attributes')->get();
             return view('webhooks.create', compact('webhook', 'strategies'));
+            
         } catch (\Exception $e) {
             return back()->with('error', 'Error loading webhook');
         }finally {
@@ -82,18 +75,17 @@ class WebhookController extends Controller
 
             $webhook = Webhook::create([
                 'name' => $request->name,
-                'stratid' => $request->stratid,
+                'strategy_id' => $request->stratid,
                 'createdBy' => Auth::id(),
                 'status' => $request->status,
                 'lastUpdatedBy' => Auth::id(),
             ]);
 
             if ($request->has('attributes')) {
-                Log::info('test');
                 foreach ($request->input('attributes', []) as $attribute) {
                     Log::info('Attribute', ['user_id' => Auth::id(), $attribute]);
                     WebhookAttribute::create([
-                        'webhid' => $webhook->webhid,
+                        'webhook_id' => $webhook->webhid,
                         'attribute_name' => $attribute['name'],
                         'attribute_value' => $attribute['value'],
                     ]);
@@ -150,7 +142,8 @@ class WebhookController extends Controller
     public function update(Request $request, Webhook $webhook)
     {
         try {
-            Log::info('Updating webhook', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid]);
+            $requestData = json_encode($request->all(), JSON_PRETTY_PRINT);
+            Log::info('Updating webhook', ['request' => $requestData]);
 
             $request->validate([
                 'name' => 'required',
@@ -163,19 +156,19 @@ class WebhookController extends Controller
 
             $webhook->update([
                 'name' => $request->name,
-                'stratid' => $request->stratid,
+                'strategy_id' => $request->stratid,
                 'status' => $request->status,
                 'lastUpdatedBy' => auth()->id(),
             ]);
 
             // Delete old attributes
-            WebhookAttribute::where('webhid', $webhook->webhid)->delete();
+            WebhookAttribute::where('webhook_id', $webhook->webhid)->delete();
 
             // Insert new attributes
             if ($request->has('attributes')) {
                 foreach ($request->input('attributes', []) as $attribute) {
                     WebhookAttribute::create([
-                        'webhid' => $webhook->webhid,
+                        'webhook_id' => $webhook->webhid,
                         'attribute_name' => $attribute['name'],
                         'attribute_value' => $attribute['value'],
                     ]);
