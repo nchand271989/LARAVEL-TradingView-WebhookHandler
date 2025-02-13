@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-
-use App\Services\Snowflake;
 
 class Strategy extends Model
 {
@@ -22,14 +21,13 @@ class Strategy extends Model
     {
         parent::boot();
         static::creating(function ($strategy) {
-            $snowflake = new Snowflake(1); // Machine ID = 1
-            $strategy->stratid = $snowflake->generateId();
+            $strategy->stratid =  generate_snowflake_id();
         });
     }
 
-    public function attributes()
+    public function attributes(): HasMany
     {
-        return $this->hasMany(StrategyAttribute::class, 'stratid', 'stratid');
+        return $this->hasMany(StrategyAttribute::class, 'strategy_id', 'stratid');
     }
     
 

@@ -14,7 +14,17 @@ class ExchangeController extends Controller
     /** Display a listing of the exchanges.*/
     public function index(Request $request)
     {
-        return fetchFilteredRecords(Exchange::class, $request, ['name', 'status', 'created_at'], 'exchanges.index', ['currencies']);    
+        try {
+
+            return fetchFilteredRecords(Exchange::class, $request, ['name', 'status', 'created_at'], 'exchanges.index', ['currencies']);    
+
+        } catch (\Exception $e) {
+            
+            logger()->error('Error fetching exchanges', ['error' => $e->getMessage()]);
+
+            return back()->with('error', 'Failed to fetch strategies.');
+
+        }
     }
 
     /** Show the form for creating a new exchange. */
