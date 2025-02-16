@@ -12,37 +12,26 @@ class RulesTableSeeder extends Seeder
     {
         DB::table('rules')->insert([
             [
-                'rid'         => generate_snowflake_id(),
-                'name'       => 'No Conditions',
-                'status'     => 'Active',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'rid'         => env('RULE_NO_CONDITION', 100000000000200001),
+                'name'        => 'No Conditions',
+                'status'      => 'Active',
+                'created_at'  => Carbon::now(),
+                'updated_at'  => Carbon::now(),
             ],
-        ]);
-
-        usleep(1); // Ensure unique Snowflake ID
-
-        DB::table('rules')->insert([
             [
-                'rid'         => generate_snowflake_id(),
-                'name'       => 'Reverse Trade',
-                'status'     => 'Active',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'rid'         => env('RULE_REVERSE_TRADE', 100000000000200002),
+                'name'        => 'Reverse Trade',
+                'status'      => 'Active',
+                'created_at'  => Carbon::now(),
+                'updated_at'  => Carbon::now(),
             ],
-        ]);
-
-        usleep(1); // Ensure unique Snowflake ID
-
-        DB::table('rules')->insert([
             [
-                'rid'         => generate_snowflake_id(),
-                'name'       => 'Stop Auto Opening of Trade',
-                'status'     => 'Active',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
+                'rid'         => env('RULE_STOP_AUTO_NEW_TRADE', 100000000000200003),
+                'name'        => 'Stop Auto Opening of Trade',
+                'status'      => 'Active',
+                'created_at'  => Carbon::now(),
+                'updated_at'  => Carbon::now(),
             ],
         ]);
-
     }
 }

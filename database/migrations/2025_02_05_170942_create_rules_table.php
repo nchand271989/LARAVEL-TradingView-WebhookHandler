@@ -6,22 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    /** Run the migrations. */
     public function up(): void
     {
         Schema::create('rules', function (Blueprint $table) {
-            $table->unsignedBigInteger('rid')->primary();
-            $table->string('name')->unique(); // Rule name (must be unique)
-            $table->timestamps(); // Created_at & updated_at
-            $table->enum('status', ['Active', 'Inactive'])->default('Active'); // Status column
+            $table->unsignedBigInteger('rid')->primary();       /** Primary key for the rule */
+            $table->string('name')->unique();                   /** Rule name, must be unique to identify different rules */
+            $table->timestamps();                               /** Timestamps for created_at and updated_at */
+            $table                                              /** Status column, can be either 'Active' or 'Inactive' with 'Active' as the default value */
+                ->enum('status', ['Active', 'Inactive'])
+                ->default('Active');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    /** Reverse the migrations. */
     public function down(): void
     {
         Schema::dropIfExists('rules');

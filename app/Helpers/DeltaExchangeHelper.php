@@ -9,22 +9,26 @@ class DeltaExchangeHelper
     public static function calculateFee(float $openingPrice, float $closingPrice, float $quantity): array
     {
         try {
-            // Calculate notional value
-            $notionalValue = ($openingPrice + $closingPrice) * $quantity;
-
-            // Calculate fees and tax
-            $tradingFee = $notionalValue * (0.02 / 100);
-            $tax = $tradingFee * (18 / 100);
-
+            
+            $notionalValue = ($openingPrice + $closingPrice) * $quantity;                               /** Calculate notional value */ 
+            $tradingFee = $notionalValue * (env('DELTA_EXCHANGE_INDIA_FUTURES_MAKER_FEE', 0.0002));     /** Calculate trading fee */ 
+            $tax = $tradingFee * (env('APPLICABLE_TAX', 0.18));                                         /** Calculate tax */ 
             return [
-                'tradingFee' => round($tradingFee, 8), // Rounded for precision
-                'tax' => round($tax, 8),
+                'tradingFee'    =>  round($tradingFee, 8),                                              /** Rounded for precision */ 
+                'tax'           =>  round($tax, 8),
             ];
         } catch (Exception $e) {
+            $requestID = generate_snowflake_id();                                                       /** Unique log id to indetify request flow */
+            logger()
+                ->error(
+                    $requestID.'-> Error while calculating Fees & Tax', [
+                        'error' =>  $e->getMessage()
+                    ]
+                );
             return [
-                'error' => true,
-                'message' => 'Trade processing failed',
-                'exception' => $e->getMessage(),
+                'error'         =>  true,
+                'message'       =>  'Error while calculating Fees & Tax',
+                'exception'     =>  $e->getMessage(),
             ];
         }
     }

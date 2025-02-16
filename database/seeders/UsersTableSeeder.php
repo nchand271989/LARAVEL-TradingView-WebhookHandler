@@ -14,12 +14,12 @@ class UsersTableSeeder extends Seeder
     {
         DB::table('users')->insert([
             [
-                'id'                => generate_snowflake_id(),    // Generate unique Snowflake ID
+                'id'                => env('ADMIN_ID', 100000000000000001),
                 'name'              => env('ADMIN_NAME', 'Admin User'),
                 'email'             => env('ADMIN_EMAIL', 'admin@example.com'),
                 'email_verified_at' => now(),
-                'password'          => Hash::make(env('ADMIN_PASSWORD', 'password123')), // Secure password
-                'is_admin'          => true, // Admin user
+                'password'          => Hash::make(env('ADMIN_PASSWORD', 'password123')),
+                'is_admin'          => true,
                 'created_at'        => Carbon::now(),
                 'updated_at'        => Carbon::now(),
             ],

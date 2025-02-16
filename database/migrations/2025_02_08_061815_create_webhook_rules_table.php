@@ -10,20 +10,30 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('webhook_rules', function (Blueprint $table) {
-            $table->unsignedBigInteger('webhook_id');                                                                  // Foreign key to store exchange id against currency
-            $table->unsignedBigInteger('rule_id');                                                                  // Foreign key to store currency id against exchange
+            $table->unsignedBigInteger('webhook_id');       /** Foreign key referencing the 'webhid' in the 'webhooks' table, associating each rule with a specific webhook */ 
+            $table->unsignedBigInteger('rule_id');          /** Foreign key referencing the 'rid' in the 'rules' table, associating each rule with a webhook */
 
             // Define foreign key constraints
-            $table->foreign('webhook_id')->references('webhid')->on('webhooks')->onDelete('cascade');
-            $table->foreign('rule_id')->references('rid')->on('rules')->onDelete('cascade');
+            $table                                          /** Foreign key constraint for 'webhook_id' */
+                ->foreign('webhook_id')
+                ->references('webhid')
+                ->on('webhooks')
+                ->onDelete('cascade');
+
+            $table                                          /** Foreign key constraint for 'rule_id' */
+                ->foreign('rule_id')
+                ->references('rid')
+                ->on('rules')
+                ->onDelete('cascade'); 
+
             
-            $table->primary(['webhook_id', 'rule_id']);                                                            // Define a composite primary key using both 'exchange_id' and 'currency_id'.
+            $table->primary(['webhook_id', 'rule_id']);     /** Define a composite primary key using both 'webhook_id' and 'rule_id' */ 
         });
     }
 
     /** Reverse the migrations. */
     public function down(): void
     {
-        Schema::dropIfExists('webhook_rules');                                                                      // Drop the table if the migration is rolled back
+        Schema::dropIfExists('webhook_rules');
     }
 };

@@ -24,8 +24,14 @@ class WebhookController extends Controller
 
         } catch (\Exception $e) {
 
-            logger()-> error('Error fetching webhooks', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
-            
+            $requestID = generate_snowflake_id();                               /** Unique log id to indetify request flow */
+            logger()
+                ->error(
+                    $requestID.'-> Error fetching webhooks', [
+                        'error'             =>  $e->getMessage(), 
+                        'request'           =>  $request->all(), 
+                    ]
+                );
             return back()->with('error', 'Error fetching webhooks');
 
         } 
@@ -48,9 +54,14 @@ class WebhookController extends Controller
 
         } catch (\Exception $e) {
             
-            logger()->error('Error fetching strategies', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
-            
-            return back()->with('error', 'Error loading strategies');
+            $requestID = generate_snowflake_id();                               /** Unique log id to indetify request flow */
+            logger()
+                ->error(
+                    $requestID.'-> Error fetching strategies, exchanges or rules while creating new webhook', [
+                        'error'             =>  $e->getMessage(), 
+                    ]
+                );
+            return back()->with('error', 'Error fetching strategies, exchanges or rules while creating new webhook');
 
         }
     }
@@ -60,18 +71,23 @@ class WebhookController extends Controller
         try {   
             
             $webhook->load('attributes');
-            
             $strategies = Strategy::with('attributes')->get();
             $exchanges = Exchange::where('status', 'Active')
                         ->with('currencies')
                         ->get();
-            $rules  = Rule::all(); // Load all available scenarios
-            
+            $rules  = Rule::all();
             return view('webhooks.create', compact('webhook', 'exchanges', 'strategies', 'rules'));
             
         } catch (\Exception $e) {
 
-            return back()->with('error', 'Error loading webhook');
+            $requestID = generate_snowflake_id();                               /** Unique log id to indetify request flow */
+            logger()
+                ->error(
+                    $requestID.'-> Error fetching strategies, exchanges or rules while updating new webhook', [
+                        'error'             =>  $e->getMessage(), 
+                    ]
+                );
+            return back()->with('error', 'Error fetching strategies, exchanges or rules while updating new webhook');
 
         }
     }
@@ -80,61 +96,60 @@ class WebhookController extends Controller
     {
         try {
 
+            DB::beginTransaction();
             $request->validate([
-                'name' => 'required',
-                'stratid' => 'required|exists:strategies,stratid',
-                'attributes' => 'nullable|array',
+                'name'                      =>  'required',
+                'stratid'                   =>  'required|exists:strategies,stratid',
+                'attributes'                =>  'nullable|array',
             ]);
-
             $webhook = Webhook::create([
-                'name' => $request->name,
-                'strategy_id' => $request->stratid,
-                'exchange_id' => $request->exid,
-                'currency_id' => $request->curid,
-                'createdBy' => Auth::id(),
-                'status' => $request->status,
-                'lastUpdatedBy' => Auth::id(),
+                'name'                      =>  $request->name,
+                'strategy_id'               =>  $request->stratid,
+                'exchange_id'               =>  $request->exid,
+                'currency_id'               =>  $request->curid,
+                'createdBy'                 =>  Auth::id(),
+                'status'                    =>  $request->status,
+                'lastUpdatedBy'             =>  Auth::id(),
             ]);
-
             if ($request->has('rules')) {
-                $rules = collect($request->rules)->map(fn($id) => (int) $id); // Convert all rule IDs to integers
-                $webhookId = (int) $webhook->webhid; // Ensure webhook_id is an integer
-
+                $rules = collect($request->rules)->map(fn($id) => (int) $id);   /** Convert all rule IDs to integers */ 
+                $webhookId = (int) $webhook->webhid;                            /** Ensure webhook_id is an integer */ 
                 $webhook->rules()->attach($rules);
-
                 foreach ($rules as $ruleId) {
                     Wallet::create([
-                        'wallet_id' => generate_snowflake_id(), // Generate unique ID
-                        'webhook_id' => $webhookId,
-                        'rule_id' => $ruleId,
-                        'user_id' => Auth::id(), // Assign wallet to the logged-in user
-                        'balance' => 0, // Default balance (change if needed)
-                        'status' => 'Active', // Default status
+                        'wallet_id'         =>  generate_snowflake_id(),        /** Generate unique ID */ 
+                        'webhook_id'        =>  $webhookId,
+                        'rule_id'           =>  $ruleId,
+                        'status'            =>  'Active',
                     ]);
                 }
             }
-
             if ($request->has('attributes')) {
                 foreach ($request->input('attributes', []) as $attribute) {
                     Log::info('Attribute', ['user_id' => Auth::id(), $attribute]);
                     WebhookAttribute::create([
-                        'webhook_id' => $webhook->webhid,
-                        'attribute_name' => $attribute['name'],
-                        'attribute_value' => $attribute['value'],
+                        'webhook_id'        =>  $webhook->webhid,
+                        'attribute_name'    =>  $attribute['name'],
+                        'attribute_value'   =>  $attribute['value'],
                     ]);
                 }
             }
-
             DB::commit();
 
         } catch (\Exception $e) {
             
             DB::rollBack();
-            
-            logger()->error('Error creating webhook', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
-
+            $requestID = generate_snowflake_id();                               /** Unique log id to indetify request flow */
+            logger()
+                ->error(
+                    $requestID.'-> Error creating webhook', [
+                        'error'             =>  $e->getMessage(), 
+                        'request'           =>  $request->all(),
+                    ]
+                );
             return back()->with('error', 'Error creating webhook: ' . $e->getMessage());
         }
+
         return redirect()->route('webhooks.index')->with('success', 'Webhook created successfully!');
     }
 
@@ -142,74 +157,65 @@ class WebhookController extends Controller
     public function update(Request $request, Webhook $webhook)
     {
         try {
+
+            DB::beginTransaction();
             $requestData = json_encode($request->all(), JSON_PRETTY_PRINT);
 
             $request->validate([
-                'name' => 'required',
-                'stratid' => 'required|exists:strategies,stratid',
-                'attributes.*.name' => 'required|string|max:255',
-                'attributes.*.value' => 'required|string|max:255',
+                'name'                      =>  'required',
+                'stratid'                   =>  'required|exists:strategies,stratid',
+                'attributes.*.name'         =>  'required|string|max:255',
+                'attributes.*.value'        =>  'required|string|max:255',
             ]);
-
-            DB::beginTransaction();
-
             $webhook->update([
-                'name' => $request->name,
-                'strategy_id' => $request->stratid,
-                'exchange_id' => $request->exid,
-                'currency_id' => $request->curid,
-                'status' => $request->status,
-                'lastUpdatedBy' => auth()->id(),
+                'name'                      =>  $request->name,
+                'strategy_id'               =>  $request->stratid,
+                'exchange_id'               =>  $request->exid,
+                'currency_id'               =>  $request->curid,
+                'status'                    =>  $request->status,
+                'lastUpdatedBy'             =>  auth()->id(),
             ]);
-
             WebhookAttribute::where('webhook_id', $webhook->webhid)->delete();
-
             if ($request->has('rules')) {
-                $rules = collect($request->rules)->map(fn($id) => (int) $id); // Convert all rule IDs to integers
-                $webhookId = (int) $webhook->webhid; // Ensure webhook_id is an integer
-
+                $rules = collect($request->rules)->map(fn($id) => (int) $id);   /** Convert all rule IDs to integers */ 
+                $webhookId = (int) $webhook->webhid;                            /** Ensure webhook_id is an integer */ 
                 $webhook->rules()->sync($rules);
-
-                // Check for wallets related to each rule and create new ones if needed
-                foreach ($rules as $ruleId) {
-                    // Check if a wallet already exists for this webhook_id and rule_id
-                    $existingWallet = Wallet::where('webhook_id', $webhookId)
+                foreach ($rules as $ruleId) {                                   /** Check for wallets related to each rule and create new ones if needed */ 
+                    $existingWallet = Wallet::where('webhook_id', $webhookId)   /** Check if a wallet already exists for this webhook_id and rule_id */ 
                                             ->where('rule_id', $ruleId)
                                             ->first();
-
-                    // If no wallet exists for the rule_id, create a new one
                     if (!$existingWallet) {
-                        Wallet::create([
-                            'wallet_id' => generate_snowflake_id(), // Generate unique ID
-                            'webhook_id' => $webhookId,
-                            'rule_id' => $ruleId,
-                            'user_id' => Auth::id(), // Assign wallet to the logged-in user
-                            'balance' => 0, // Default balance (change if needed)
-                            'status' => 'Active', // Default status
+                        Wallet::create([                                        /** If no wallet exists for the rule_id, create a new one */ 
+                            'wallet_id'     =>  generate_snowflake_id(),             
+                            'webhook_id'    =>  $webhookId,
+                            'rule_id'       =>  $ruleId,
+                            'status'        =>  'Active',
                         ]);
                     }
                 }
             }
-
-
             if ($request->has('attributes')) {
                 foreach ($request->input('attributes', []) as $attribute) {
                     WebhookAttribute::create([
-                        'webhook_id' => $webhook->webhid,
-                        'attribute_name' => $attribute['name'],
-                        'attribute_value' => $attribute['value'],
+                        'webhook_id'        =>  $webhook->webhid,
+                        'attribute_name'    =>  $attribute['name'],
+                        'attribute_value'   =>  $attribute['value'],
                     ]);
                 }
             }
-
             DB::commit();
 
         } catch (\Exception $e) {
             
             DB::rollBack();
-            
-            logger()->error('Error updating webhook', ['webhid' => $webhook->webhid, 'error' => $e->getMessage()]);
-
+            $requestID = generate_snowflake_id();                               /** Unique log id to indetify request flow */
+            logger()
+                ->error(
+                    $requestID.'-> Error updating webhook', [
+                        'error'             =>  $e->getMessage(), 
+                        'request'           =>  $request->all(),
+                    ]
+                );
             return back()->with('error', 'Error updating webhook: ' . $e->getMessage());
         }
         

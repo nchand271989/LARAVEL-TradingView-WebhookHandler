@@ -10,16 +10,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('privacy_policies', function (Blueprint $table) {
-            $table->unsignedBigInteger('pid')->primary();                       // Privacy Policy Id
-            $table->text('content');                                            // Privacy policy Content
-            $table->string('version');                                          // Version to track changes
-            $table->timestamps();                                               // Timestamps (created_at, updated_at)
+            $table->unsignedBigInteger('pid')->primary();   /** Primary key for the privacy_policies table, using an unsigned big integer */
+            $table->text('content');                        /** The actual content of the privacy policy, stored as text since it may be lengthy */
+            $table->string('version');                      /** The version of the privacy policy, used to track different revisions or changes */
+            $table->timestamps();                           /** Timestamps for created_at and updated_at */
         });
     }
 
     /** Reverse the migrations. */
     public function down(): void
     {
-        Schema::dropIfExists('privacy_policies');                               // Drop the table if the migration is rolled back
+        Schema::dropIfExists('privacy_policies');
     }
 };

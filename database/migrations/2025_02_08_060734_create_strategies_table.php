@@ -6,33 +6,38 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    /** Run the migrations. */
     public function up(): void
     {
         Schema::create('strategies', function (Blueprint $table) {
-            $table->unsignedBigInteger('stratid')->primary(); // Store Snowflake ID as an integer
+            $table->unsignedBigInteger('stratid')->primary();   /** Store Snowflake ID as an integer for unique strategy identification */ 
 
-            $table->string('name');
-            $table->text('pineScript');
-            $table->boolean('auto_reverse_order')->default(true);
+            $table->string('name');                             /** Name of the strategy, a string that holds the strategy's name */ 
+            $table->text('pineScript');                         /** Pine Script code that defines the strategy's logic */ 
             
-            $table->unsignedBigInteger('createdBy');
-            $table->unsignedBigInteger('lastUpdatedBy');
+            $table->unsignedBigInteger('createdBy');            /** Foreign key for the user who created this strategy */ 
+            $table->unsignedBigInteger('lastUpdatedBy');        /** Foreign key for the user who last updated this strategy */ 
             
-            $table->timestamps();
-            $table->enum('status', ['Active', 'Inactive'])->default('Active');
+            $table->timestamps();                               /** Timestamps for created_at and updated_at */ 
+            $table                                              /** Enum for the status of the strategy, can be 'Active' or 'Inactive', default is 'Active' */
+                ->enum('status', ['Active', 'Inactive'])
+                ->default('Active');
 
-            // Add foreign key constraint AFTER column definition
-            $table->foreign('createdBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
-            $table->foreign('lastUpdatedBy')->references('id')->on('users')->onDelete('cascade'); // Foreign key reference
+            /** Define foreign key constraints */ 
+            $table                                              /** Add foreign key constraint for 'createdBy', references 'id' in the 'users' table, cascading on delete */
+                ->foreign('createdBy')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
+            $table                                              /** Add foreign key constraint for 'lastUpdatedBy', references 'id' in the 'users' table, cascading on delete */ 
+                ->foreign('lastUpdatedBy')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    /** Reverse the migrations. */
     public function down(): void
     {
         Schema::dropIfExists('strategies');

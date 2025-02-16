@@ -17,49 +17,45 @@ class WalletController extends Controller
     /** Display a listing of the wallets.*/
     public function index(Request $request)
     {
-        $relations = ['balance'];                                                                                                      
-        // $withSum = ['ledger as balance' => 'amount'];                                                               /** Sum the `amount` column from `ledger` relation */ 
+        $relations = ['balance'];
+        return fetchFilteredRecords(Wallet::class, $request, ['wltid', 'status'], 'wallets.index', $relations);
 
-        return fetchFilteredRecords(Wallet::class, 
-            $request, 
-            ['wltid', 'status'], 
-            'wallets.index',
-            $relations
-        );
     }
 
     /** Show the form for creating a new wallet. */
     public function create()
     {
+
         $exchanges = Exchange::where('status', 'Active')->get();
         return view('wallets.create', compact('exchanges'));
+    
     }
 
 
     public function store(Request $request)
     {
-        $requestID = generate_snowflake_id();
-        
-        logger()->info($requestID.'-> Requested to create new waller', ['request' => $request]);                    /** Logging -> wallet creation request*/
-
-        $request->validate([
-            'exid' => 'required|integer',
-        ]);
-
         try {
 
-            $wallet = Wallet::create([
-                'exchange_id' => $request->exid,
-                'status' => 'Active',
+            $request->validate([
+                'exid'                  => 'required|integer',
             ]);
-
-            logger()->info($requestID.'-> New wallet Created', ['request' => $request]);                            /** Logging -> wallet created. */
+            $wallet = Wallet::create([
+                'exchange_id'           => $request->exid,
+                'status'                => 'Active',
+            ]);
 
         } catch (\Exception $e) {
 
-            logger()->error($requestID.'-> Error creating wallet: ' . $e->getMessage());
-
+            $requestID = generate_snowflake_id();                               /** Unique log id to indetify request flow */
+            logger()
+                ->error(
+                    $requestID.'-> Error creating wallet', [
+                        'error'         =>  $e->getMessage(), 
+                        'request'       =>  $request->all(), 
+                    ]
+                );
             return back()->withErrors('Error creating wallet.');
+
         }
 
         return redirect()->route('wallets.index')->with('success', 'Wallet created successfully.');
@@ -68,30 +64,28 @@ class WalletController extends Controller
 
     public function topUp(Request $request, $wltid)
     {
-        $requestID = generate_snowflake_id();
-
-        logger()->info($requestID.'-> Requested to top up wallet', 
-            ['wallet' => $wltid, 'request' => $request]);                                                           /** Logging -> wallet top up request*/
-
-        $request->validate([
-            'amount' => 'required|numeric|min:0.01',
-        ]);
-
         try {
-            Ledger::create([
-                'wallet_id' => $wltid,
-                'amount' => $request->amount,
-                'transaction_type' => 'Credit',
-                'description' => 'Wallet top-up',
-            ]);
 
-            logger()->info($requestID.'-> Top up successfull on wallet.', 
-                ['wallet' => $wltid, 'request' => $request]);                                                       /** Logging -> wallet top up request*/
+            $request->validate([
+                'amount' => 'required|numeric|min:0.01',
+            ]);
+            Ledger::create([
+                'wallet_id'             => $wltid,
+                'amount'                => $request->amount,
+                'transaction_type'      => 'Credit',
+                'description'           => 'Wallet top-up',
+            ]);
 
         } catch (\Exception $e) {
             
-            logger()->error($requestID.'-> Error topping up wallet: ' . $e->getMessage());
-            
+            $requestID = generate_snowflake_id();                               /** Unique log id to indetify request flow */
+            logger()
+                ->error(
+                    $requestID.'-> Error topping up wallet', [
+                        'error'         =>  $e->getMessage(), 
+                        'request'       =>  $request->all(), 
+                    ]
+                );
             return back()->withErrors('Error topping up wallet.');
         }
 

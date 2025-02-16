@@ -2,14 +2,11 @@
 
 use App\Services\Snowflake;
 
-if (!function_exists('generate_snowflake_id')) {
+function generate_snowflake_id(int $machineId = null): int
+{
 
-    /** Generate a unique Snowflake ID. @return int */
-    
-    function generate_snowflake_id(): int
-    {
-        $machineId = env('SNOWFLAKE_MACHINE_ID', 1);                // Fetch machine ID from .env
-        $snowflake = new Snowflake($machineId);                     // Initialize Snowflake generator
-        return $snowflake->generateId();                            // Generate and return Snowflake ID
-    }
+    $machineId = $machineId ?? env('SNOWFLAKE_MACHINE_ID', 1);      /** If no machine ID is passed, use the one from the environment */
+    $snowflake = new Snowflake($machineId);
+    return $snowflake->generateId();
 }
+

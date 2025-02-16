@@ -20,7 +20,7 @@ class FetchTradeInfo
         return DB::table('wallets')
             ->where('rule_id', $ruleId)
             ->where('webhook_id', $webhookId)
-            ->value('wltid'); // Directly fetches the wallet ID or returns null
+            ->value('wltid');
     }
 
     public static function fetchBalance($walletId)

@@ -10,22 +10,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('exchanges', function (Blueprint $table) {
-            $table->unsignedBigInteger('exid')->primary();                                                  // Exchange Id
-            $table->string('name', 255)->unique();                                                          // Exchange name
-            $table->unsignedBigInteger('createdBy');                                                        // Foreign key to store userId of user created this exchange
-            $table->unsignedBigInteger('lastUpdatedBy');                                                    // Foreign key to store userId of user last updated this exchange
-            $table->timestamps();                                                                           // Created_at and Updated_at timestamps
-            $table->enum('status', ['Active', 'Inactive'])->default('Active');                              // Store status of exchanges whether it is Active or Inactive
+            $table->unsignedBigInteger('exid')->primary();  /** Primary key for the exchanges table, using an unsigned big integer to store a unique exchange ID */
+            $table->string('name', 255)->unique();          /** The name of the exchange, stored as a string with a maximum length of 255 characters */
+            $table->unsignedBigInteger('createdBy');        /** Foreign key to reference the user who created the exchange */
+            $table->unsignedBigInteger('lastUpdatedBy');    /** Foreign key to reference the user who last updated the exchange */
+            $table->timestamps();                           /** Timestamps for created_at and updated_at */ 
+            $table                                          /** An enum to store the status of the exchange, either 'Active' or 'Inactive', with 'Active' as the default */
+                ->enum('status', ['Active', 'Inactive'])
+                ->default('Active');
 
             /** Define foreign key constraints */ 
-            $table->foreign('createdBy')->references('id')->on('users')->onDelete('cascade'); 
-            $table->foreign('lastUpdatedBy')->references('id')->on('users')->onDelete('cascade');
+            $table                                          /** The 'createdBy' column is a foreign key that references the 'id' column in the 'users' table. */
+                ->foreign('createdBy')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade'); 
+            $table                                          /** The 'lastUpdatedBy' column is a foreign key that references the 'id' column in the 'users' table. */
+                ->foreign('lastUpdatedBy')
+                ->references('id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 
     /** Reverse the migrations. */
     public function down(): void
     {
-        Schema::dropIfExists('exchanges');                                                                 // Drop the table if the migration is rolled back
+        Schema::dropIfExists('exchanges');
     }
 };

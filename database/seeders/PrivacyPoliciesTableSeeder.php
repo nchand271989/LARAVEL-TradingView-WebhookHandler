@@ -12,13 +12,12 @@ class PrivacyPoliciesTableSeeder extends Seeder
     /** Run the database seeds. */
     public function run(): void
     {
-        // Render the Blade template and store the output as HTML
-        $ppContent = View::make('legal.default-pp')->render();
+        $ppContent = View::make('legal.default-pp')->render();          // Render the Blade template and store the output as HTML
 
         DB::table('privacy_policies')->insert([
-            'pid'        => generate_snowflake_id(),   // Generate unique Snowflake ID
-            'content'    => $ppContent,               // Store the rendered Blade template
-            'version'    => '1.0',                    // Initial version
+            'pid'        => env('PP_ID', 110000000000100002),
+            'content'    => $ppContent,               
+            'version'    => '1.0',
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);

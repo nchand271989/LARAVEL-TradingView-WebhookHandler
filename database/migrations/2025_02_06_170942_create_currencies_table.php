@@ -10,19 +10,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('currencies', function (Blueprint $table) {
-            $table->unsignedBigInteger('curid')->primary();                                             // Currency Id
-            $table->string('name', 100);                                                                // Currency name
-            $table->string('shortcode', 10)->unique();                                                  // Currency short code
-            $table->unsignedBigInteger('createdBy');                                                    // Foreign key to store userId of user created this curency
-            $table->unsignedBigInteger('lastUpdatedBy');                                                // Foreign key to store userId of user last updated this curency
-            $table->timestamps();                                                                       // Created_at and Updated_at timestamps
-            $table->enum('status', ['Active', 'Inactive'])->default('Active');                          // Store status of currencies whether it is Active or Inactive
+            $table->unsignedBigInteger('curid')->primary();     /** Primary key for the currency table, using an unsigned big integer */ 
+            $table->string('name', 100)->unique();              /** Currency name, it is a unique field and limited to 100 characters */
+            $table->string('shortcode', 10)->unique();          /** Currency shortcode, unique and limited to 10 characters (e.g., BTC, ETH) */
+            $table->unsignedBigInteger('createdBy');            /** Foreign key to store the ID of the user who created this currency entry */ 
+            $table->unsignedBigInteger('lastUpdatedBy');        /** Foreign key to store the ID of the user who last updated this currency entry */ 
+            $table->timestamps();                               /** Timestamps for created_at and updated_at */ 
+            $table                                              /** Enum field to store the status of the currency, can either be 'Active' or 'Inactive', default is 'Active' */
+                ->enum('status', ['Active', 'Inactive'])
+                ->default('Active');
 
-            // Define foreign key constraints
-            $table->foreign('createdBy')
+            /** Define foreign key constraints */ 
+            $table                                              /** Reference to the 'users' table for 'createdBy', with cascading delete */
+                ->foreign('createdBy')
                 ->references('id')->on('users')
                 ->onDelete('cascade');           
-            $table->foreign('lastUpdatedBy')
+            $table                                              /** Reference to the 'users' table for 'lastUpdatedBy', with cascading delete */
+                ->foreign('lastUpdatedBy')
                 ->references('id')->on('users')
                 ->onDelete('cascade');       
         });
@@ -31,6 +35,6 @@ return new class extends Migration
     /** Reverse the migrations. */
     public function down(): void
     {
-        Schema::dropIfExists('currencies');                                                             // Drop the table if the migration is rolled back
+        Schema::dropIfExists('currencies');
     }
 };

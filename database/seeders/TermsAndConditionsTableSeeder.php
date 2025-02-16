@@ -12,13 +12,12 @@ class TermsAndConditionsTableSeeder extends Seeder
     /** Run the database seeds. */
     public function run(): void
     {
-        // Render the Blade template and store the output as HTML
-        $tncContent = View::make('legal.default-tnc')->render();            
+        $tncContent = View::make('legal.default-tnc')->render();            // Render the Blade template and store the output as HTML
 
         DB::table('terms_and_conditions')->insert([
-            'tid'        => generate_snowflake_id(),   // Generate unique Snowflake ID
-            'content'    => $tncContent,              // Store the rendered Blade template
-            'version'    => '1.0',                    // Initial version
+            'tid'        => env('TNC_ID', 110000000000100001),
+            'content'    => $tncContent,
+            'version'    => '1.0',     
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ]);

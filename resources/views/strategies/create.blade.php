@@ -65,14 +65,6 @@
                         </div>
                     </div>
 
-                    <!-- Auto Reverse Order Checkbox -->
-                    <div class="mt-4 flex items-center">
-                    <input type="checkbox" name="auto_reverse_order" id="auto_reverse_order"
-                    class="form-checkbox h-5 w-5 text-blue-600"
-                    {{ isset($strategy) ? ($strategy->auto_reverse_order ? 'checked' : '') : 'checked' }}>
-                        <label for="auto_reverse_order" class="ml-2 text-sm font-medium text-gray-700">Auto Reverse Order</label>
-                    </div>
-
                      <!-- Status -->
                      <div class="mt-4">
                         <label class="block text-gray-700 font-bold mb-2">Status:</label>

@@ -6,24 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    /** Run the migrations. */
     public function up(): void
     {
         Schema::create('strategy_attributes', function (Blueprint $table) {
-            $table->unsignedBigInteger('strategy_id'); // Store Snowflake ID as an integer
-            $table->string('attribute_name');
-            $table->string('attribute_value');
-            $table->timestamps();
+            $table->unsignedBigInteger('strategy_id');      /** Foreign key to reference the strategy ID from the 'strategies' table */
+            $table->string('attribute_name');               /** Name of the strategy attribute */
+            $table->string('attribute_value');              /** Value of the strategy attribute */
+            $table->timestamps();                           /** Timestamps for created_at and updated_at */ 
 
-            $table->foreign('strategy_id')->references('stratid')->on('strategies')->onDelete('cascade');
+            $table                                          /** Define foreign key constraints to link the strategy attributes to strategies */
+                ->foreign('strategy_id')
+                ->references('stratid')
+                ->on('strategies')
+                ->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    /** Reverse the migrations. */
     public function down(): void
     {
         Schema::dropIfExists('strategy_attributes');
