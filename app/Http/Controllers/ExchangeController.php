@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exchange;
-use App\Models\ExchangeWallet;
+use App\Models\Wallet;
 use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

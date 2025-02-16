@@ -30,7 +30,8 @@
                     :actions="['Edit']"
                     :items="$records"
                     :detachRelations="[]"
-                    editRoute="strategies.edit" />
+                    editRoute="strategies.edit"
+                    key="stratid" />
 
                 <div class="mt-4">
                     {{ $records->links() }}

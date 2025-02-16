@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ExchangeWallet extends Model
+class Wallet extends Model
 {
     protected $primaryKey = 'wltid';
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected $fillable = ['wltid','exchange_id', 'status'];
+    protected $fillable = ['wltid', 'webhook_id', 'rule_id', 'status'];    
 
     protected static function boot()
     {
@@ -20,14 +20,22 @@ class ExchangeWallet extends Model
         });
     }
 
-    public function exchange()
+    public function scenario()
     {
-        return $this->belongsTo(Exchange::class, 'exchange_id', 'exid');
+        return $this->belongsTo(Scenario::class, 'scenario_id');
     }
 
     public function ledger()
     {
         return $this->hasMany(Ledger::class, 'wallet_id', 'wltid');
+    }    
+
+    public function balance()
+    {
+        return $this->hasOne(Ledger::class, 'wallet_id', 'wltid')
+            ->selectRaw("SUM(CASE WHEN transaction_type = 'Credit' THEN amount ELSE -amount END) as balance, wallet_id")
+            ->groupBy('wallet_id');
     }
+
 
 }

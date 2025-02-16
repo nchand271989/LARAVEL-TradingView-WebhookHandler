@@ -7,11 +7,13 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Webhook;
 use App\Models\WebhookAttribute;
 use App\Models\Strategy;
+use App\Models\Exchange;
+use App\Models\Scenario;
+use App\Models\Rule;
+use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-
-use App\Services\Snowflake;
 
 class WebhookController extends Controller
 {
@@ -21,39 +23,56 @@ class WebhookController extends Controller
             return fetchFilteredRecords(Webhook::class, $request, ['name', 'status', 'created_at'], 'webhooks.index', ['strategy']);    
 
         } catch (\Exception $e) {
-            Log::error('Error fetching webhooks', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
+
+            logger()-> error('Error fetching webhooks', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
+            
             return back()->with('error', 'Error fetching webhooks');
-        } finally {
-            DB::disconnect();
-        }
+
+        } 
+
         return view('webhooks.index', compact('webhooks'));
     }
 
     public function create()
     {
         try {
+            
             $strategies = Strategy::with('attributes')->get();
-            return view('webhooks.create', compact('strategies'));
+            $exchanges = Exchange::where('status', 'Active')
+                        ->with('currencies')
+                        ->get();
+
+            $rules  = Rule::all(); // Load all available scenarios
+            
+            return view('webhooks.create', compact('strategies', 'exchanges', 'rules'));
+
         } catch (\Exception $e) {
-            Log::error('Error fetching strategies', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
+            
+            logger()->error('Error fetching strategies', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
+            
             return back()->with('error', 'Error loading strategies');
-        }finally {
-            DB::disconnect();
+
         }
     }
 
     public function edit(Webhook $webhook)
     {
-        try {
+        try {   
             
             $webhook->load('attributes');
+            
             $strategies = Strategy::with('attributes')->get();
-            return view('webhooks.create', compact('webhook', 'strategies'));
+            $exchanges = Exchange::where('status', 'Active')
+                        ->with('currencies')
+                        ->get();
+            $rules  = Rule::all(); // Load all available scenarios
+            
+            return view('webhooks.create', compact('webhook', 'exchanges', 'strategies', 'rules'));
             
         } catch (\Exception $e) {
+
             return back()->with('error', 'Error loading webhook');
-        }finally {
-            DB::disconnect();
+
         }
     }
 
@@ -61,25 +80,39 @@ class WebhookController extends Controller
     {
         try {
 
-            Log::info('Creating new webhook', ['user_id' => Auth::id(), 'name' => $request->name, 'stratid' => $request->stratid]);
-
             $request->validate([
                 'name' => 'required',
                 'stratid' => 'required|exists:strategies,stratid',
                 'attributes' => 'nullable|array',
             ]);
 
-            DB::beginTransaction();
-
-            $snowflake = new Snowflake(1); // Machine ID = 1
-
             $webhook = Webhook::create([
                 'name' => $request->name,
                 'strategy_id' => $request->stratid,
+                'exchange_id' => $request->exid,
+                'currency_id' => $request->curid,
                 'createdBy' => Auth::id(),
                 'status' => $request->status,
                 'lastUpdatedBy' => Auth::id(),
             ]);
+
+            if ($request->has('rules')) {
+                $rules = collect($request->rules)->map(fn($id) => (int) $id); // Convert all rule IDs to integers
+                $webhookId = (int) $webhook->webhid; // Ensure webhook_id is an integer
+
+                $webhook->rules()->attach($rules);
+
+                foreach ($rules as $ruleId) {
+                    Wallet::create([
+                        'wallet_id' => generate_snowflake_id(), // Generate unique ID
+                        'webhook_id' => $webhookId,
+                        'rule_id' => $ruleId,
+                        'user_id' => Auth::id(), // Assign wallet to the logged-in user
+                        'balance' => 0, // Default balance (change if needed)
+                        'status' => 'Active', // Default status
+                    ]);
+                }
+            }
 
             if ($request->has('attributes')) {
                 foreach ($request->input('attributes', []) as $attribute) {
@@ -90,60 +123,26 @@ class WebhookController extends Controller
                         'attribute_value' => $attribute['value'],
                     ]);
                 }
-                Log::info('Webhook attributes stored successfully', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid]);
             }
 
             DB::commit();
+
         } catch (\Exception $e) {
+            
             DB::rollBack();
-            Log::error('Error creating webhook', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
+            
+            logger()->error('Error creating webhook', ['user_id' => Auth::id(), 'error' => $e->getMessage()]);
+
             return back()->with('error', 'Error creating webhook: ' . $e->getMessage());
-        }
-        finally {
-            DB::disconnect();
         }
         return redirect()->route('webhooks.index')->with('success', 'Webhook created successfully!');
     }
 
-    public function toggleStatus(Webhook $webhook)
-    {
-        try {
-            $newStatus = $webhook->status === 'Active' ? 'Inactive' : 'Active';
-
-            $webhook->update(['status' => $newStatus]);
-
-            Log::info('Webhook status updated successfully', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid, 'new_status' => $newStatus]);
-        } catch (\Exception $e) {
-            Log::error('Error toggling webhook status', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid, 'error' => $e->getMessage()]);
-            return back()->with('error', 'Error toggling webhook status');
-        }
-        finally {
-            DB::disconnect();
-        }
-        return redirect()->route('webhooks.index')->with('success', 'Webhook status updated successfully!');
-    }
-
-    public function destroy(Webhook $webhook)
-    {
-        try {
-            Log::info('Deleting webhook', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid]);
-
-            $webhook->delete();
-            return back()->with('success', 'Webhook deleted successfully.');
-        } catch (\Exception $e) {
-            Log::error('Error deleting webhook', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid, 'error' => $e->getMessage()]);
-            return back()->with('error', 'Error deleting webhook');
-        }
-        finally {
-            DB::disconnect();
-        }
-    }
 
     public function update(Request $request, Webhook $webhook)
     {
         try {
             $requestData = json_encode($request->all(), JSON_PRETTY_PRINT);
-            Log::info('Updating webhook', ['request' => $requestData]);
 
             $request->validate([
                 'name' => 'required',
@@ -157,14 +156,42 @@ class WebhookController extends Controller
             $webhook->update([
                 'name' => $request->name,
                 'strategy_id' => $request->stratid,
+                'exchange_id' => $request->exid,
+                'currency_id' => $request->curid,
                 'status' => $request->status,
                 'lastUpdatedBy' => auth()->id(),
             ]);
 
-            // Delete old attributes
             WebhookAttribute::where('webhook_id', $webhook->webhid)->delete();
 
-            // Insert new attributes
+            if ($request->has('rules')) {
+                $rules = collect($request->rules)->map(fn($id) => (int) $id); // Convert all rule IDs to integers
+                $webhookId = (int) $webhook->webhid; // Ensure webhook_id is an integer
+
+                $webhook->rules()->sync($rules);
+
+                // Check for wallets related to each rule and create new ones if needed
+                foreach ($rules as $ruleId) {
+                    // Check if a wallet already exists for this webhook_id and rule_id
+                    $existingWallet = Wallet::where('webhook_id', $webhookId)
+                                            ->where('rule_id', $ruleId)
+                                            ->first();
+
+                    // If no wallet exists for the rule_id, create a new one
+                    if (!$existingWallet) {
+                        Wallet::create([
+                            'wallet_id' => generate_snowflake_id(), // Generate unique ID
+                            'webhook_id' => $webhookId,
+                            'rule_id' => $ruleId,
+                            'user_id' => Auth::id(), // Assign wallet to the logged-in user
+                            'balance' => 0, // Default balance (change if needed)
+                            'status' => 'Active', // Default status
+                        ]);
+                    }
+                }
+            }
+
+
             if ($request->has('attributes')) {
                 foreach ($request->input('attributes', []) as $attribute) {
                     WebhookAttribute::create([
@@ -176,14 +203,16 @@ class WebhookController extends Controller
             }
 
             DB::commit();
+
         } catch (\Exception $e) {
+            
             DB::rollBack();
-            Log::error('Error updating webhook', ['user_id' => Auth::id(), 'webhid' => $webhook->webhid, 'error' => $e->getMessage()]);
+            
+            logger()->error('Error updating webhook', ['webhid' => $webhook->webhid, 'error' => $e->getMessage()]);
+
             return back()->with('error', 'Error updating webhook: ' . $e->getMessage());
         }
-        finally {
-            DB::disconnect();
-        }
+        
         return redirect()->route('webhooks.index')->with('success', 'Webhook updated successfully!');
     }
 }

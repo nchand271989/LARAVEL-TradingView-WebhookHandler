@@ -15,6 +15,8 @@ return new class extends Migration
             $table->unsignedBigInteger('webhid')->primary(); // Store Snowflake ID as an integer
             $table->string('name');
             $table->unsignedBigInteger('strategy_id');
+            $table->unsignedBigInteger('exchange_id');
+            $table->unsignedBigInteger('currency_id');
             $table->unsignedBigInteger('createdBy');
             $table->unsignedBigInteger('lastUpdatedBy');
             $table->timestamps();

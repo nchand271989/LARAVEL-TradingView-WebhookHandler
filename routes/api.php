@@ -10,5 +10,5 @@ Route::get('/user', function (Request $request) {
 
 use App\Http\Controllers\Api\WebhookValidationController;
 
-Route::get('/{secretkey}/{userid}/{webhookid}/{strategyid}/{hash}', [WebhookValidationController::class, 'validateUrl']);
+Route::post('/{secretkey}/{userid}/{webhookid}/{strategyid}/{hash}', [WebhookValidationController::class, 'validateUrl']);
 

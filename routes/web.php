@@ -10,6 +10,7 @@ use App\Http\Controllers\StrategyController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\ScenarioController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,17 +20,19 @@ Route::get('/terms', [TermsController::class, 'show'])->name('terms');
 
 Route::get('/policy', [PrivacyPolicyController::class, 'show'])->name('policy');
 
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-});
+// Route::middleware([
+//     'auth:sanctum',
+//     config('jetstream.auth_session'),
+//     'verified',
+// ])->group(function () {
+//     Route::get('/dashboard', function () {
+//         return view('dashboard');
+//     })->name('dashboard');
+// });
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Email Verification
     Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {

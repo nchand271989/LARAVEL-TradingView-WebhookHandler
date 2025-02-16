@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Exchange;
-use App\Models\ExchangeWallet;
+use App\Models\Wallet;
 use App\Models\Ledger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,15 +17,14 @@ class WalletController extends Controller
     /** Display a listing of the wallets.*/
     public function index(Request $request)
     {
-        $relations = ['exchange:exid,name'];                                                                                  /** Eager load exchange relation */ 
-        $withSum = ['ledger as balance' => 'amount'];                                                                         /** Sum the `amount` column from `ledger` relation */ 
+        $relations = ['balance'];                                                                                                      
+        // $withSum = ['ledger as balance' => 'amount'];                                                               /** Sum the `amount` column from `ledger` relation */ 
 
-        return fetchFilteredRecords(ExchangeWallet::class, 
+        return fetchFilteredRecords(Wallet::class, 
             $request, 
             ['wltid', 'status'], 
-            'wallets.index', 
-            $relations, 
-            $withSum
+            'wallets.index',
+            $relations
         );
     }
 
@@ -41,7 +40,7 @@ class WalletController extends Controller
     {
         $requestID = generate_snowflake_id();
         
-        logger()->info($requestID.'-> Requested to create new waller', ['request' => $request]);                              /** Logging -> wallet creation request*/
+        logger()->info($requestID.'-> Requested to create new waller', ['request' => $request]);                    /** Logging -> wallet creation request*/
 
         $request->validate([
             'exid' => 'required|integer',
@@ -49,12 +48,12 @@ class WalletController extends Controller
 
         try {
 
-            $wallet = \App\Models\ExchangeWallet::create([
+            $wallet = Wallet::create([
                 'exchange_id' => $request->exid,
                 'status' => 'Active',
             ]);
 
-            logger()->info($requestID.'-> New wallet Created', ['request' => $request]);                                      /** Logging -> wallet created. */
+            logger()->info($requestID.'-> New wallet Created', ['request' => $request]);                            /** Logging -> wallet created. */
 
         } catch (\Exception $e) {
 
@@ -71,7 +70,8 @@ class WalletController extends Controller
     {
         $requestID = generate_snowflake_id();
 
-        logger()->info($requestID.'-> Requested to top up wallet', ['wallet' => $wltid, 'request' => $request]);              /** Logging -> wallet top up request*/
+        logger()->info($requestID.'-> Requested to top up wallet', 
+            ['wallet' => $wltid, 'request' => $request]);                                                           /** Logging -> wallet top up request*/
 
         $request->validate([
             'amount' => 'required|numeric|min:0.01',
@@ -85,7 +85,8 @@ class WalletController extends Controller
                 'description' => 'Wallet top-up',
             ]);
 
-            logger()->info($requestID.'-> Top up successfull on wallet.', ['wallet' => $wltid, 'request' => $request]);       /** Logging -> wallet top up request*/
+            logger()->info($requestID.'-> Top up successfull on wallet.', 
+                ['wallet' => $wltid, 'request' => $request]);                                                       /** Logging -> wallet top up request*/
 
         } catch (\Exception $e) {
             

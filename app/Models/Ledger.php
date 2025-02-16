@@ -14,6 +14,6 @@ class Ledger extends Model
 
     public function wallet()
     {
-        return $this->belongsTo(ExchangeWallet::class, 'wallet_id', 'wltid');
+        return $this->belongsTo(Wallet::class, 'wallet_id', 'wltid');
     }
 }

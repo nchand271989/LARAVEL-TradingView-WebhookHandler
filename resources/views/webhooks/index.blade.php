@@ -27,7 +27,8 @@
                     :actions="['Edit']"
                     :items="$records"
                     :detachRelations="[]"
-                    editRoute="webhooks.edit" />
+                    editRoute="webhooks.edit"
+                    key="exchange_id" />
 
                 <div class="mt-4">{{ $records->links() }}</div>
             </div>

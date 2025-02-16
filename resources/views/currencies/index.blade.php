@@ -31,7 +31,8 @@
                     ]"
                     :items="$records"
                     statusToggleRoute="currencies.toggleStatus"
-                    :detachRelations="['exchanges']" />
+                    :detachRelations="['exchanges']"
+                    key="curid" />
 
                 <div class="mt-4">
                     {{ $records->links() }}

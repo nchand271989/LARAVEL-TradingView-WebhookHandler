@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('transaction_time')->useCurrent();
             $table->timestamps();
 
-            $table->foreign('wallet_id')->references('wltid')->on('exchange_wallets')->onDelete('cascade'); 
+            $table->foreign('wallet_id')->references('wltid')->on('wallets')->onDelete('cascade'); 
         });
     }
 

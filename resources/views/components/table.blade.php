@@ -7,6 +7,7 @@
     'deleteRoute' => null,
     'topUpRoute' => null,
     'topUpWalletKey' => null,
+    'key' => null,
 ])
 
 @php
@@ -52,7 +53,9 @@
                         $alignment = $loop->last ? 'text-right' : 'text-left';
                     @endphp
                     <td class="py-3 px-6 {{ $alignment }} @if($index === 'currencies' || $index === 'webhook-url') hidden sm:table-cell @endif">
-                        @if ($index === 'status')
+                    @if ($index === 'name')
+                        {{ $item->name }}<br/><span class="text-xs"><i>({{ $item->{$key} }})</i></span>
+                    @elseif ($index === 'status')
                             @livewire('status-toggle', [
                                 'model' => $item,
                                 'actions' => $actions,

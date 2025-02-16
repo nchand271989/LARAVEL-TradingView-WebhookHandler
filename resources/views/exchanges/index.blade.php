@@ -32,7 +32,8 @@
                     :items="$records"
                     :detachRelations="['wallets']"
                     editRoute="exchanges.edit"
-                    deleteRoute="exchanges.destroy" />
+                    deleteRoute="exchanges.destroy"
+                    key="exid" />
 
                 <div class="mt-4">
                     {{ $records->links() }}

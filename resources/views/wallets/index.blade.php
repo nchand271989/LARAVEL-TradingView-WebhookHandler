@@ -15,14 +15,14 @@
                 <x-table-toolbar 
                     searchAction="{{ route('wallets.index') }}" 
                     searchPlaceholder="Search Wallets..."
+                    :showButton='false'
                     buttonLabel="Add Wallet"
                     buttonRoute="{{ route('wallets.create') }}" />
 
                 <x-table 
                     :columns="[
                         'wltid' => 'Wallet ID',
-                        'exchange->name' => 'Exchange Name',
-                        'balance' => 'Balance',
+                        'balance->balance' => 'Balance',
                         'status' => 'Status',
                         'topup' => 'Top Up',
                     ]"

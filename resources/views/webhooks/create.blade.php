@@ -38,6 +38,7 @@
                         </select>
                     </div>
 
+
                     <div id="strategy-attributes" class="mb-4 {{ isset($webhook) && $webhook->attributes->count() > 0 ? '' : 'hidden' }}">
                         <h3 class="text-gray-700">Strategy Attributes:</h3>
                         <div id="attributes-container">
@@ -57,6 +58,68 @@
                                 @endforeach
                             @endif
                         </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-gray-700">Select Exchange:</label>
+                        <select name="exid" id="exchange-select" class="w-full border rounded p-2" required>
+                            <option value="">-- Select Exchange --</option>
+                            @foreach ($exchanges as $exchange)
+                                <option value="{{ $exchange->exid }}" 
+                                    exchange-attributes='@json($exchange->currencies)'
+                                    {{ isset($webhook) && $webhook->exchange_id == $exchange->exid ? 'selected' : '' }}>
+                                    {{ $exchange->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div id="currency-container" class="mb-4 {{ isset($webhook) && $webhook->exchange_id!= null ? '' : 'hidden' }}">
+                        <label class="block text-gray-700">Select Currencies:</label>
+                        <select name="curid" id="currency-select" class="w-full border rounded p-2" required>
+                            <option value="">-- Select Currencies --</option>
+                            @if(isset($webhook) && $exchanges->contains('exid', $webhook->exchange_id))
+                                @php
+                                    // Find the exchange that matches the webhook's exchange_id
+                                    $selectedExchange = $exchanges->firstWhere('exid', $webhook->exchange_id);
+                                @endphp
+                                
+                                @foreach($selectedExchange->currencies as $currency)
+                                    <option 
+                                        value="{{$currency->curid}}"
+                                        {{ isset($webhook) && $webhook->currency_id == $currency->curid ? 'selected' : '' }}>
+                                            {{$currency->name}}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+
+
+                    <!-- Select Rules -->
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-bold mb-2">Select Test Rules:</label>
+
+                        <div class="flex justify-start gap-2 mb-2">
+                            <button type="button" id="select-all" class="bg-blue-500 text-white px-2 py-1 rounded text-sm">Select All</button>
+                            <button type="button" id="deselect-all" class="bg-red-500 text-white px-2 py-1 rounded text-sm">Deselect All</button>
+                        </div>
+
+                        <div class="border border-gray-300 rounded-lg p-2 overflow-y-auto" style="max-height: 300px;">
+                            @foreach($rules as $rule)
+                                <div class="flex items-center mb-2">
+                                    <label class="flex items-center cursor-pointer w-full">
+                                        <input type="checkbox" name="rules[]" value="{{ $rule->rid }}" 
+                                            class="rules-checkbox mr-2"
+                                            {{ isset($webhook) && $webhook->rules->contains('rid', $rule->rid) ? 'checked' : '' }}>
+                                        <span class="flex items-center space-x-2">
+                                            <span>{{ $rule->name }}</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                        @error('rules') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
                     </div>
 
                     <!-- Status -->
@@ -80,6 +143,10 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const strategySelect = document.getElementById("strategy-select");
+            const exchangeSelect = document.getElementById("exchange-select");
+            const currencySelect = document.getElementById("currency-select");
+            
+            const currencyContainer = document.getElementById("currency-container");
             const attributesContainer = document.getElementById("attributes-container");
             const strategyAttributesDiv = document.getElementById("strategy-attributes");
             const form = document.getElementById("webhook-form");
@@ -128,6 +195,35 @@
                 loadAttributes(selectedOption.getAttribute("data-attributes"));
             });
 
+            exchangeSelect.addEventListener("change", function () {
+                const selectedOption = exchangeSelect.options[exchangeSelect.selectedIndex];
+                loadExchangeAttributes(selectedOption.getAttribute("exchange-attributes"));
+            });
+
+            function loadExchangeAttributes(attributesJson) {
+                if (!attributesJson || attributesJson === "null") {
+                    currencyContainer.classList.add("hidden");
+                    return;
+                }
+
+                const processedJson = attributesJson.replace(/"curid":(\d{15,})/g, '"curid":"$1"');
+
+                const attributes = JSON.parse(processedJson);
+
+                if (attributes.length > 0) {
+                    console.log(attributes);
+                    currencyContainer.classList.remove("hidden");
+                    currencySelect.innerHTML = '<option value="">-- Select Currencies --</option>';
+                    attributes.forEach((attribute, index) => { 
+                        const option = document.createElement('option');
+                        option.value = attribute.curid;  // assuming 'id' is the value for each attribute
+                        option.textContent = attribute.name;  // assuming 'name' is the display text
+                        currencySelect.appendChild(option);
+                    });
+                }
+            }
+
+
             form.addEventListener("submit", function () {
                 submitBtn.disabled = true;
                 submitBtn.innerText = "Processing...";
@@ -139,6 +235,16 @@
             @else
                 loadAttributes(@json($webhook->strategy->attributes ?? []));
             @endif
+
+            // Select all checkboxes
+            document.getElementById('select-all').addEventListener('click', function() {
+                document.querySelectorAll('.rules-checkbox').forEach(checkbox => checkbox.checked = true);
+            });
+
+            // Deselect all checkboxes
+            document.getElementById('deselect-all').addEventListener('click', function() {
+                document.querySelectorAll('.rules-checkbox').forEach(checkbox => checkbox.checked = false);
+            });
         });
     </script>
 </x-app-layout>
