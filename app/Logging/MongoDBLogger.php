@@ -26,14 +26,20 @@ class MongoDBLogger extends AbstractProcessingHandler
     /** Writes log records to MongoDB. */
     protected function write(LogRecord $record): void
     {
-        $this->collection->insertOne([
-            'user_id' => (string) (Auth::id() ?? ''),                                                               // Use empty string if Auth::id() is null
-            'message' => $record->message,
-            'channel' => $record->channel,
-            'level' => $record->level->name,
-            'context' => (array) $record->context,
-            'extra' => (array) $record->extra,
-            'datetime' => $record->datetime->format('Y-m-d H:i:s'),
-        ]);        
+        try {
+            $this->collection->insertOne([
+                'user_id' => (string) (Auth::id() ?? ''), 
+                'message' => $record->message,
+                'channel' => $record->channel,
+                'level' => $record->level->name,
+                'context' => (array) $record->context,
+                'extra' => (array) $record->extra,
+                'datetime' => $record->datetime->format('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            // You could log the error here or send it to a fallback logging system
+            \Log::error('MongoDB Logger Error: ' . $e->getMessage());
+        }
     }
+
 }
