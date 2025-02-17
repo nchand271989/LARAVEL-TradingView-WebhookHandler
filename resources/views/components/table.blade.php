@@ -68,27 +68,6 @@
                                 <small class="text-gray-500 cursor-pointer text-blue-500 underline" onclick="copyToClipboard('{{ url('/api/' . env('HOOK_KEY') . '/' . $item->createdBy . '/' . $item->webhid . '/' . $item->strategy_id . '/' . $item->exchange_id   . '/' . $item->currency_id . '/' . hash('sha256', env('HASH_KEY') . $item->createdBy . $item->webhid . $item->strategy_id)) }}')">
                                     Click here to copy URL
                                 </small>
-                                @php
-                                    $msg = {
-                                            "Position Size": {{strategy.position_size}},
-                                            "Action": "{{strategy.order.action}}",
-                                            "Contracts": {{strategy.order.contracts}},
-                                            "Price": {{strategy.order.price}},
-                                            "Market Position": "{{strategy.market_position}}",
-                                            "Previous Market Position": "{{strategy.prev_market_position}} ",
-                                            "Previous Market Position Size": {{strategy.prev_market_position_size}},
-                                            "Exchange": "{{exchange}}",
-                                            "Timeframe": "{{interval}}",
-                                            "Ticker": "{{ticker}}",
-                                            "Volume": {{volume}},
-                                            "webhookId": "$item->webhid",
-                                            "webhookName": "$item->name",
-                                            "strategyId": "$item->strategy_id"
-                                        } 
-                                @endphp
-                                <small class="text-gray-500 cursor-pointer text-blue-500 underline" onclick="copyToClipboard($msg)">
-                                    Click here to copy Alert message
-                                </small>
                                 <!-- Notification -->
                                 <div id="copy-notification" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hidden">
                                     Webhook URL Copied!
