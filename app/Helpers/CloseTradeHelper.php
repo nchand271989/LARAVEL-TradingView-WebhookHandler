@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 class CloseTradeHelper
 {
-    public static function closeTrade(string $webhookId, string $strategyId, string $ruleId, string $walletId, float $price)
+    public static function closeTrade(string $webhookId, string $strategyId, string $exchangeId, string $currencyid, string $ruleId, string $walletId, float $price)
     {
         try {
             
@@ -18,6 +18,8 @@ class CloseTradeHelper
                 'strategy_id'           =>  $strategyId,
                 'rule_id'               =>  $ruleId,
                 'wallet_id'             =>  $walletId,
+                'exchange_id'           =>  $exchangeId,
+                'currency_id'           =>  $currencyid,
                 'status'                =>  'Active',
             ])->first();
 
@@ -42,7 +44,6 @@ class CloseTradeHelper
             } else {
                 $profitLoss = ($quantity * $openingPrice) - ($quantity * $price);
             }
-
 
             $msg = json_encode(
                 [

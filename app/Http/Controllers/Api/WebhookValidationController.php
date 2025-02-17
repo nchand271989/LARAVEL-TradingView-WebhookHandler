@@ -41,7 +41,7 @@ class WebhookValidationController extends Controller
         
         foreach ($ruleIds as $ruleId) {
             $walletId = FetchTradeInfo::fetchWalletId($ruleId, $webhookid);
-            $webhookRules[] = OrderRule::{"R" . $ruleId}($webhookid, $strategyid, $exchangeId, $currencyid, $ruleId, $walletId, $price, $positionSize, $action); 
+            $webhookRules[] = OrderRule::{"R" . $ruleId}($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $action); 
         }
 
         return response()->json(['rules' => $ruleIds, 'webhookRules' => $webhookRules], 200);

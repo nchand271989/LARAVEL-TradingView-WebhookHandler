@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class OrderRule
 {
-    public static function R100000000000200001($webhookid, $strategyid, $ruleId, $walletId, $price, $positionSize, $action)
+    public static function R100000000000200001($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $action)
     {
         if (is_null($positionSize) || is_null($price) || !in_array($action, ['buy', 'sell'])) {
             return response()->json(
@@ -19,9 +19,9 @@ class OrderRule
 
         $positionType = $action === 'buy' ? 'long' : 'short';
 
-        return DB::transaction(function () use ($webhookid, $strategyid, $ruleId, $walletId, $price, $positionSize, $positionType) {
-            $closeTradeResponse = CloseTradeHelper::CloseTrade($webhookid, $strategyid, $ruleId, $walletId, $price);
-            $openTradeResponse = OpenTradeHelper::openTrade($webhookid, $strategyid, $ruleId, $walletId, $price, $positionSize, $positionType);
+        return DB::transaction(function () use ($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $positionType) {
+            $closeTradeResponse = CloseTradeHelper::CloseTrade($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price);
+            $openTradeResponse = OpenTradeHelper::openTrade($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $positionType);
 
             return response()->json([
                 'message'       =>  'Trade processed successfully',
@@ -31,7 +31,7 @@ class OrderRule
         });
     }
 
-    public static function R100000000000200002($webhookid, $strategyid, $ruleId, $walletId, $price, $positionSize, $action)
+    public static function R100000000000200002($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $action)
     {
         if (is_null($positionSize) || is_null($price) || !in_array($action, ['buy', 'sell'])) {
             return response()->json(
@@ -42,9 +42,9 @@ class OrderRule
 
         $positionType = $action === 'buy' ? 'short' : 'long';
 
-        return DB::transaction(function () use ($webhookid, $strategyid, $ruleId, $walletId, $price, $positionSize, $positionType) {
-            $closeTradeResponse = CloseTradeHelper::CloseTrade($webhookid, $strategyid, $ruleId, $walletId, $price);
-            $openTradeResponse = OpenTradeHelper::openTrade($webhookid, $strategyid, $ruleId, $walletId, $price, $positionSize, $positionType);
+        return DB::transaction(function () use ($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $positionType) {
+            $closeTradeResponse = CloseTradeHelper::CloseTrade($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price);
+            $openTradeResponse = OpenTradeHelper::openTrade($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $positionType);
 
             return response()->json([
                 'message'       =>  'Trade processed successfully',
@@ -54,7 +54,7 @@ class OrderRule
         });
     }
 
-    public static function R100000000000200003($webhookid, $strategyid, $ruleId, $walletId, $price, $positionSize, $action)
+    public static function R100000000000200003($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $action)
     {
         if (is_null($positionSize) || is_null($price) || !in_array($action, ['buy', 'sell'])) {
             return response()->json(
@@ -65,12 +65,12 @@ class OrderRule
 
         $positionType = $action === 'buy' ? 'long' : 'short';
 
-        return DB::transaction(function () use ($webhookid, $strategyid, $ruleId, $walletId, $price, $positionSize, $positionType) {
-            $closeTradeResponse = CloseTradeHelper::CloseTrade($webhookid, $strategyid, $ruleId, $walletId, $price);
+        return DB::transaction(function () use ($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $positionType) {
+            $closeTradeResponse = CloseTradeHelper::CloseTrade($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price);
             $responseData = $closeTradeResponse->getData();
 
             if ($responseData->closedTrades == 0) {
-                $openTradeResponse = OpenTradeHelper::openTrade($webhookid, $strategyid, $ruleId, $walletId, $price, $positionSize, $positionType);
+                $openTradeResponse = OpenTradeHelper::openTrade($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $positionType);
             } else {
                 $openTradeResponse = null;
             }

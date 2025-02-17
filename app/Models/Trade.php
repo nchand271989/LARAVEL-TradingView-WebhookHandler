@@ -18,6 +18,8 @@ class Trade extends Model
         'id',
         'webhook_id',
         'strategy_id',
+        'exchange_id',
+        'currency_id',
         'rule_id',
         'wallet_id',
         'positionType',
