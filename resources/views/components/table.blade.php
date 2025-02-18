@@ -84,11 +84,11 @@
                                             "Ticker": "\{\{ticker\}\}",
                                             "Volume": \{\{volume\}\},
                                             "webhookId": "${webhook_id}",
-                                            "webhookName": "${webhook_name}",
+                                            "webhook Name": "${webhook_name}",
                                             "strategyId": "${strategy_id}"
                                         }`;
 
-                                        const compactMessage = message.replace(/\s+/g, '');
+                                        const compactMessage = message.replace(/\s{2,}/g, ' ').replace(/\n/g, '');
 
                                         copyToClipboard(compactMessage, 'Alert message copied');
                                     }
