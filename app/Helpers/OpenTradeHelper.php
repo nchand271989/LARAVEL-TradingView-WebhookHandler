@@ -20,7 +20,7 @@ class OpenTradeHelper
         $requiredMargin = $positionValue / $leverage;  // Margin required based on leverage
 
         // Add applicable tax if needed (adjusting the required margin for taxes, as per your business logic)
-        $requiredAmount = ($requiredMargin * (1 + env('APPLICABLE_TAX', 0.18)))*5; 
+        $requiredAmount = ($requiredMargin * (1 + env('APPLICABLE_TAX', 0.18)))*1; 
 
         if ($balance < $requiredAmount) {
             logger()
