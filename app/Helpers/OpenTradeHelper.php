@@ -23,6 +23,11 @@ class OpenTradeHelper
         $requiredAmount = ($requiredMargin * (1 + env('APPLICABLE_TAX', 0.18)))*5; 
 
         if ($balance < $requiredAmount) {
+            logger()
+                ->info(
+                    'Insufficient Blance - '. $balance
+                );
+
             return response()->json(
                 [
                     'message'   => 'Insufficient balance', 'openTrades'=>0

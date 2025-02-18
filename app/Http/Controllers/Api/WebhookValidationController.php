@@ -20,16 +20,36 @@ class WebhookValidationController extends Controller
         $expectedSecretKey = env('HOOK_KEY');
         $hashKey = env('HASH_KEY');
         if ($secretkey !== $expectedSecretKey) {                                                /** Validate Secret Key */
+            logger()
+                ->info(
+                    'Invalid Secret Key', [
+                        'request'   =>  $request()
+                    ]
+                );
             return response()->json(['message' => 'Invalid Secret Key'], 403);
+            
         }
 
         $generatedHash = hash('sha256', $hashKey . $userid . $webhookid . $strategyid);
         if (!hash_equals($generatedHash, $hash)) {                                              /** Validate Hash Key */
+            logger()
+                ->info(
+                    'Not Authorized', [
+                        'request'   =>  $request()
+                    ]
+                );
             return response()->json(['message' => 'Not Authorized'], 403);
         }
 
         if (Webhook::where('webhid', $webhookid)->where('status', 'Inactive')->exists()) {      /** Validate webhook is active */
+            logger()
+                ->info(
+                    'Invalid Request', [
+                        'request'   =>  $request()
+                    ]
+                );
             return response()->json(['message' => 'Invalid request'], 400);
+            
         }
 
         $data = $request->only(['Position Size', 'Action', 'Price', 'Timeframe']);
