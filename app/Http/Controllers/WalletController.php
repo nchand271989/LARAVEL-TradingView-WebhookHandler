@@ -18,7 +18,7 @@ class WalletController extends Controller
     public function index(Request $request)
     {
         $relations = ['balance'];
-        return fetchFilteredRecords(Wallet::class, $request, ['wltid', 'status'], 'wallets.index', $relations);
+        return fetchFilteredRecords(Wallet::class, $request, ['wltid', 'rule_id', 'status'], 'wallets.index', $relations);
 
     }
 
@@ -89,7 +89,8 @@ class WalletController extends Controller
             return back()->withErrors('Error topping up wallet.');
         }
 
-        return redirect()->route('wallets.index')->with('success', 'Wallet topped up successfully.');
+        // return redirect()->route('wallets.index')->with('success', 'Wallet topped up successfully.');
+        return back()->with('success', 'Wallet topped up successfully.');
     }
 }
 

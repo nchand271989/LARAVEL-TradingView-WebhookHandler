@@ -14,13 +14,14 @@ use App\Models\Wallet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\LedgerHelper;
 
 class WebhookController extends Controller
 {
     public function index(Request $request)
     {
         try {
-            return fetchFilteredRecords(Webhook::class, $request, ['name', 'status', 'created_at'], 'webhooks.index', ['strategy']);    
+            return fetchFilteredRecords(Webhook::class, $request, ['name', 'status', 'created_at'], 'webhooks.index', ['strategy','rules']);    
 
         } catch (\Exception $e) {
 
@@ -94,8 +95,8 @@ class WebhookController extends Controller
 
     public function store(Request $request)
     {
-        try {
 
+        try {
             DB::beginTransaction();
             $request->validate([
                 'name'                      =>  'required',
@@ -111,13 +112,18 @@ class WebhookController extends Controller
                 'status'                    =>  $request->status,
                 'lastUpdatedBy'             =>  Auth::id(),
             ]);
+
+            $walletIds = [];
+
             if ($request->has('rules')) {
                 $rules = collect($request->rules)->map(fn($id) => (int) $id);   /** Convert all rule IDs to integers */ 
                 $webhookId = (int) $webhook->webhid;                            /** Ensure webhook_id is an integer */ 
                 $webhook->rules()->attach($rules);
                 foreach ($rules as $ruleId) {
+                    $walletId = generate_snowflake_id();
+                    $walletIds[] = $walletId;
                     Wallet::create([
-                        'wallet_id'         =>  generate_snowflake_id(),        /** Generate unique ID */ 
+                        'wallet_id'         =>  $walletId,        /** Generate unique ID */ 
                         'webhook_id'        =>  $webhookId,
                         'rule_id'           =>  $ruleId,
                         'status'            =>  'Active',
@@ -134,6 +140,7 @@ class WebhookController extends Controller
                     ]);
                 }
             }
+
             DB::commit();
 
         } catch (\Exception $e) {
@@ -161,6 +168,8 @@ class WebhookController extends Controller
             DB::beginTransaction();
             $requestData = json_encode($request->all(), JSON_PRETTY_PRINT);
 
+            $walletIds = [];
+
             $request->validate([
                 'name'                      =>  'required',
                 'stratid'                   =>  'required|exists:strategies,stratid',
@@ -185,8 +194,10 @@ class WebhookController extends Controller
                                             ->where('rule_id', $ruleId)
                                             ->first();
                     if (!$existingWallet) {
+                        $walletId = generate_snowflake_id();
+                        $walletIds[] = $walletId;
                         Wallet::create([                                        /** If no wallet exists for the rule_id, create a new one */ 
-                            'wallet_id'     =>  generate_snowflake_id(),             
+                            'wallet_id'     =>  $walletId,             
                             'webhook_id'    =>  $webhookId,
                             'rule_id'       =>  $ruleId,
                             'status'        =>  'Active',

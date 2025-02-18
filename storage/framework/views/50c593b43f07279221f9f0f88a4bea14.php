@@ -63,10 +63,9 @@
 <?php if (isset($attributes)) { $__attributesOriginal163c8ba6efb795223894d5ffef5034f5 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.table','data' => ['columns' => [
                         'name' => 'Name',
-                        'strategy->name' => 'Strategy',
-                        'webhook-url' => 'URL',
+                        'rules' => 'Rules',
                         'status' => 'Status',
-                    ],'actions' => ['Edit'],'items' => $records,'detachRelations' => [],'editRoute' => 'webhooks.edit','key' => 'webhid']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+                    ],'actions' => ['Edit'],'items' => $records,'detachRelations' => [],'editRoute' => 'webhooks.edit','key' => 'webhid','topUpRoute' => 'wallets.topup']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('table'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
@@ -75,10 +74,9 @@
 <?php endif; ?>
 <?php $component->withAttributes(['columns' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([
                         'name' => 'Name',
-                        'strategy->name' => 'Strategy',
-                        'webhook-url' => 'URL',
+                        'rules' => 'Rules',
                         'status' => 'Status',
-                    ]),'actions' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(['Edit']),'items' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($records),'detachRelations' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([]),'editRoute' => 'webhooks.edit','key' => 'webhid']); ?>
+                    ]),'actions' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(['Edit']),'items' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($records),'detachRelations' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([]),'editRoute' => 'webhooks.edit','key' => 'webhid','topUpRoute' => 'wallets.topup']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal163c8ba6efb795223894d5ffef5034f5)): ?>

@@ -20,15 +20,15 @@
                 <x-table 
                     :columns="[
                         'name' => 'Name',
-                        'strategy->name' => 'Strategy',
-                        'webhook-url' => 'URL',
+                        'rules' => 'Rules',
                         'status' => 'Status',
                     ]"
                     :actions="['Edit']"
                     :items="$records"
                     :detachRelations="[]"
                     editRoute="webhooks.edit"
-                    key="webhid" />
+                    key="webhid"
+                    topUpRoute="wallets.topup" />
 
                 <div class="mt-4">{{ $records->links() }}</div>
             </div>
