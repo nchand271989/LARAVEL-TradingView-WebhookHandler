@@ -32,16 +32,21 @@ class WebhookValidationController extends Controller
             return response()->json(['message' => 'Invalid request'], 400);
         }
 
-        $data = $request->only(['Position Size', 'Action', 'Price']);
+        $data = $request->only(['Position Size', 'Action', 'Price', 'Timeframe']);
         $positionSize = $data['Position Size'] ?? null;
         $action = strtolower($data['Action'] ?? '');
+        $timeframe = $data['Timeframe'] ?? '5m';
+        if (is_numeric($timeframe)) {
+            $timeframe .= 'm';
+        }
+
         $price = $data['Price'] ?? null;
         $ruleIds = FetchTradeInfo::fetchRulesId($webhookid);                                    /** Fetch scenario and wallet IDs */
         $webhookRules = [];
         
         foreach ($ruleIds as $ruleId) {
             $walletId = FetchTradeInfo::fetchWalletId($ruleId, $webhookid);
-            $webhookRules[] = OrderRule::{"R" . $ruleId}($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $price, $positionSize, $action); 
+            $webhookRules[] = OrderRule::{"R" . $ruleId}($webhookid, $strategyid, $exchangeid, $currencyid, $ruleId, $walletId, $timeframe, $price, $positionSize, $action); 
         }
 
         return response()->json(['rules' => $ruleIds, 'webhookRules' => $webhookRules], 200);

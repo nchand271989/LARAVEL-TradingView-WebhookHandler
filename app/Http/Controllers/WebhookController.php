@@ -131,8 +131,12 @@ class WebhookController extends Controller
                 }
             }
             if ($request->has('attributes')) {
+                WebhookAttribute::create([
+                    'webhook_id'        =>  $webhook->webhid,
+                    'attribute_name'    =>  'Timeframe',
+                    'attribute_value'   =>  $request->timeframe,
+                ]);
                 foreach ($request->input('attributes', []) as $attribute) {
-                    Log::info('Attribute', ['user_id' => Auth::id(), $attribute]);
                     WebhookAttribute::create([
                         'webhook_id'        =>  $webhook->webhid,
                         'attribute_name'    =>  $attribute['name'],

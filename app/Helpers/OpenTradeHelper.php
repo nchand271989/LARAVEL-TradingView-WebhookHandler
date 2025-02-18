@@ -9,7 +9,7 @@ use App\Helpers\FetchTradeInfo;
 
 class OpenTradeHelper
 {
-    public static function openTrade(string $webhookId, string $strategyId, string $exchangeId, string $currencyId, string $ruleId, string $walletId, float $price, float $positionSize, string $positionType)
+    public static function openTrade(string $webhookId, string $strategyId, string $exchangeId, string $currencyId, string $ruleId, string $walletId, string $timeframe, float $price, float $positionSize, string $positionType)
     {
         $balance = FetchTradeInfo::fetchBalance($walletId);
         $requiredAmount = (($price * $positionSize) * env('APPLICABLE_TAX', 0.18))*5;
@@ -30,6 +30,7 @@ class OpenTradeHelper
                 'exchange_id'   =>  $exchangeId,
                 'currency_id'   =>  $currencyId,
                 'rule_id'       =>  $ruleId,
+                'timeframe'     =>  $timeframe,
                 'wallet_id'     =>  $walletId,
                 'quantity'      =>  $positionSize,
                 'openingPrice'  =>  $price,

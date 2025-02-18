@@ -70,6 +70,18 @@
 
                     <div id="strategy-attributes" class="mb-4 <?php echo e(isset($webhook) && $webhook->attributes->count() > 0 ? '' : 'hidden'); ?>">
                         <h3 class="text-gray-700">Strategy Attributes:</h3>
+                        <?php if(!isset($webhook)): ?>
+                            <div class="flex justify-between items-center w-full border-b gap-2 pb-2 mb-2">
+                                <input class="text-gray-700 w-1/4 border-0" 
+                                    value="Timeframe" 
+                                    readonly />
+                                <input type="text" 
+                                    name="timeframe" 
+                                    class="w-3/4 border rounded p-2" 
+                                    value="5m" 
+                                    required />
+                            </div>
+                        <?php endif; ?>
                         <div id="attributes-container">
                             <?php if(isset($webhook)): ?>
                                 <?php $__currentLoopData = $webhook->attributes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $attribute): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
