@@ -12,7 +12,15 @@ class OpenTradeHelper
     public static function openTrade(string $webhookId, string $strategyId, string $exchangeId, string $currencyId, string $ruleId, string $walletId, string $timeframe, float $price, float $positionSize, string $positionType)
     {
         $balance = FetchTradeInfo::fetchBalance($walletId);
-        $requiredAmount = (($price * $positionSize) * env('APPLICABLE_TAX', 0.18))*5;
+
+        $leverage = 25;
+
+        // Calculate the required margin (taking leverage into account)
+        $positionValue = $price * $positionSize;  // Total position value
+        $requiredMargin = $positionValue / $leverage;  // Margin required based on leverage
+
+        // Add applicable tax if needed (adjusting the required margin for taxes, as per your business logic)
+        $requiredAmount = ($requiredMargin * (1 + env('APPLICABLE_TAX', 0.18)))*5; 
 
         if ($balance < $requiredAmount) {
             return response()->json(

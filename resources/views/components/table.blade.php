@@ -72,23 +72,25 @@
                                     function getMessage(webhook_id, webhook_name, strategy_id) {
                                         // Message content
                                         const message = `{
-                                            "Position Size": \{\{ strategy.position_size \}\},
-                                            "Action": "\{\{ strategy.order.action \}\}",
-                                            "Contracts": \{\{ strategy.order.contracts \}\},
-                                            "Price": \{\{ strategy.order.price \}\},
-                                            "Market Position": "\{\{ strategy.market_position \}\}",
-                                            "Previous Market Position": "\{\{ strategy.prev_market_position \}\}",
-                                            "Previous Market Position Size": \{\{ strategy.prev_market_position_size \}\},
-                                            "Exchange": "\{\{ exchange \}\}",
-                                            "Timeframe": "\{\{ interval \}\}",
-                                            "Ticker": "\{\{ ticker \}\}",
-                                            "Volume": \{\{ volume \}\},
+                                            "Position Size": \{\{strategy.position_size\}\},
+                                            "Action": "\{\{strategy.order.action\}\}",
+                                            "Contracts": \{\{strategy.order.contracts\}\},
+                                            "Price": \{\{strategy.order.price\}\},
+                                            "Market Position": "\{\{strategy.market_position\}\}",
+                                            "Previous Market Position": "\{\{strategy.prev_market_position\}\}",
+                                            "Previous Market Position Size": \{\{strategy.prev_market_position_size\}\},
+                                            "Exchange": "\{\{exchange\}\}",
+                                            "Timeframe": "\{\{interval\}\}",
+                                            "Ticker": "\{\{ticker\}\}",
+                                            "Volume": \{\{volume\}\},
                                             "webhookId": "${webhook_id}",
                                             "webhookName": "${webhook_name}",
                                             "strategyId": "${strategy_id}"
                                         }`;
 
-                                        copyToClipboard(message, 'Alert message copied');
+                                        const compactMessage = message.replace(/\s+/g, '');
+
+                                        copyToClipboard(compactMessage, 'Alert message copied');
                                     }
                                 </script>
 
