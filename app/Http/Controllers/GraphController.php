@@ -42,7 +42,7 @@ class GraphController extends Controller
         // Loop through ledger entries and calculate the balance
         foreach ($ledgers as $ledger) {
             // Convert the date string to a Carbon instance
-            $date = Carbon::parse($ledger->created_at);
+            $date = Carbon::parse($ledger->created_at)->setTimezone('Asia/Kolkata');;
 
             // Update balance based on transaction type
             if ($ledger->transaction_type == 'Credit') {
