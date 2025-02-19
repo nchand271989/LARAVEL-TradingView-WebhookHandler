@@ -17,25 +17,27 @@
                                 <div class="card-body flex flex-wrap gap-4 p-4 ">
                                     <?php $__currentLoopData = $webhook['rules']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rule): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <!-- Nested Card for Rule with Order Count and Balance -->
-                                        <div class="card mb-3 shadow-sm border-light w-full sm:w-auto bg-[#F5F5F5]">
-                                            <div class="card-header bg-light p-3">
-                                                <h6 class="card-title mb-0 text-[#008c02]"><?php echo e($rule['rule']); ?></h6>
+                                        <a href="<?php echo e(route('graph.index', ['wallet_id' => $rule['wallet_id']])); ?>">
+                                            <div class="card mb-3 shadow-sm border-light w-full sm:w-auto bg-[#F5F5F5]">
+                                                <div class="card-header bg-light p-3">
+                                                    <h6 class="card-title mb-0 text-[#008c02]"><?php echo e($rule['rule']); ?></h6>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <p class="card-text">Number of Orders: <strong><?php echo e($rule['trade_count']); ?></strong></p>
+                                                    <!-- Display the balance -->
+                                                    <p class="card-text">
+                                                        P&L: 
+                                                        <strong style="color: <?php echo e($rule['p&L'] < 0 ? 'red' : 'green'); ?>">
+                                                            <?php echo e(number_format($rule['p&L'], 8)); ?>
+
+                                                        </strong>
+                                                    </p>
+
+
+                                                    <p class="card-text">Balance: <strong><?php echo e($rule['balance']); ?></strong></p>
+                                                </div>
                                             </div>
-                                            <div class="card-body p-3">
-                                                <p class="card-text">Number of Orders: <strong><?php echo e($rule['trade_count']); ?></strong></p>
-                                                <!-- Display the balance -->
-                                                <p class="card-text">
-                                                    P&L: 
-                                                    <strong style="color: <?php echo e($rule['p&L'] < 0 ? 'red' : 'green'); ?>">
-                                                        <?php echo e(number_format($rule['p&L'], 8)); ?>
-
-                                                    </strong>
-                                                </p>
-
-
-                                                <p class="card-text">Balance: <strong><?php echo e($rule['balance']); ?></strong></p>
-                                            </div>
-                                        </div>
+                                        </a>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>

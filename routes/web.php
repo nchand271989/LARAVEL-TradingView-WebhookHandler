@@ -11,6 +11,7 @@ use App\Http\Controllers\WebhookController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\ScenarioController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GraphController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -88,6 +89,9 @@ Route::middleware(['auth'])->group(function () {
     // Webhooks
     Route::resource('webhooks', WebhookController::class);
     Route::patch('/webhooks/{webhook}/toggle-status', [WebhookController::class, 'toggleStatus'])->name('webhooks.toggleStatus');
+
+
+    Route::get('/graph/{wallet_id?}', [GraphController::class, 'index'])->name('graph.index');
 
 
 });
